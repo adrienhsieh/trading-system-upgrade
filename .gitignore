@@ -1,0 +1,43 @@
+# ── 敏感資訊 ──────────────────────────────────────────────────
+.env
+
+# ── 資料庫與持倉資料 ───────────────────────────────────────────
+positions.db
+config.json
+intelligence.db
+intelligence.db-shm
+intelligence.db-wal
+ohlcv_cache.db
+
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ── 虛擬環境 ───────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── 編輯器 ────────────────────────────────────────────────────
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── 日誌 ──────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── 研究資料庫（巢狀 git repo）────────────────────────────────
+data/tw-coverage/

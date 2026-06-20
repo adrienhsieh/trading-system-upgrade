@@ -1,0 +1,8 @@
+flask>=3.0.0
+flask-cors>=4.0.0
+Flask-Limiter>=3.5.0
+yfinance>=0.2.36
+pandas>=2.0.0
+requests>=2.31.0
+pytest>=9.0.2
+defusedxml>=0.7.1

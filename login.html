@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading System ｜ 使用者驗證</title>
+  
+  <!-- 導入與原廠對齊的 Tabler 框架與字體 -->
+  <link rel="stylesheet" href="https://jsdelivr.net">
+  <link rel="stylesheet" href="https://googleapis.com">
+  
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text-primary: #e6edf3;
+      --text-secondary: #8b949e;
+      --blue: #3b82f6;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Noto Sans TC', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg) !important;
+      color: var(--text-primary) !important;
+      font-family: var(--sans);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 400px;
+      padding: 16px;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+    }
+
+    .logo-mono {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--blue);
+      letter-spacing: 2px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .logo-mono span { color: #f59e0b; }
+
+    .form-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      background: var(--bg) !important;
+      color: var(--text-primary) !important;
+      border-color: var(--border) !important;
+      font-size: 13px;
+    }
+    .form-control:focus {
+      border-color: var(--blue) !important;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15) !important;
+    }
+
+    .btn-primary-sm {
+      background: var(--blue);
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-primary-sm:hover { opacity: 0.85; }
+
+    .switch-link {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-top: 16px;
+      cursor: pointer;
+    }
+    .switch-link span {
+      color: var(--blue);
+      text-decoration: underline;
+    }
+
+    /* 原廠 Toast 提示元件精準複製 */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-family: var(--mono);
+      color: var(--text-primary);
+      z-index: 9999;
+      transform: translateY(60px);
+      opacity: 0;
+      transition: all .3s;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.ok   { border-color: #10b981; color: #10b981; }
+    #toast.err  { border-color: #ef4444; color: #ef4444; }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="login-card">
+      <div class="logo-mono">📈 TRADING<span>SYSTEM</span></div>
+      
+      <!-- 動態標題 -->
+      <h3 id="page-title" class="card-title text-center mb-4" style="font-size: 15px; font-weight: 600;">帳戶身分驗證</h3>
+      
+      <!-- 表單本體 -->
+      <div class="mb-3">
+        <label class="form-label">Username / 交易帳號</label>
+        <input type="text" id="username" class="form-control" placeholder="請輸入帳號" autocomplete="off">
+      </div>
+      
+      <div class="mb-4">
+        <label class="form-label">Password / 密碼</label>
+        <input type="password" id="password" class="form-control" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter') handleAuthAction()">
+      </div>
+      
+      <button id="submit-btn" class="btn-primary-sm" onclick="handleAuthAction()">🔓 安全登入</button>
+      
+      <!-- 切換登入/註冊模式 -->
+      <div class="switch-link" id="toggle-mode-text" onclick="toggleAuthMode()">
+        尚未擁有帳號？ <span>立即註冊新帳戶</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 原廠相容提示元件 -->
+  <div id="toast"></div>
+
+  <!-- ── 前端核心認證控制 JavaScript ── -->
+  <script>
+    let isLoginMode = true; // 預設為登入模式
+
+    // 原廠 Toast 呼叫器
+    defToast = (msg, type='ok') => {
+      const el = document.getElementById('toast');
+      if (!el) return;
+      el.textContent = msg; 
+      el.className = `toast ${type} show`;
+      setTimeout(() => el.classList.remove('show'), 3000);
+    }
+
+    // 切換登入或註冊面板
+    toggleAuthMode = () => {
+      isLoginMode = !isLoginMode;
+      const title = document.getElementById('page-title');
+      const btn = document.getElementById('submit-btn');
+      const toggleText = document.getElementById('toggle-mode-text');
+      
+      if (isLoginMode) {
+        title.innerText = "帳戶身分驗證";
+        btn.innerHTML = "🔓 安全登入";
+        toggleText.innerHTML = "尚未擁有帳號？ <span>立即註冊新帳戶</span>";
+      } else {
+        title.innerText = "建立全新交易帳戶";
+        btn.innerHTML = "✨ 提交註冊";
+        toggleText.innerHTML = "已經擁有帳號？ <span>返回登入畫面</span>";
+      }
+    }
+
+    // 核心動作處理器（串接後端 Python Auth 藍圖）
+    handleAuthAction = async () => {
+      const userInp = document.getElementById('username').value.trim();
+      const pwdInp = document.getElementById('password').value.trim();
+
+      if (!userInp || !pwdInp) {
+        defToast("請完整填寫帳號與密碼欄位！", "err");
+        return;
+      }
+
+      // 根據當前模式決定拋送的 API 路由
+      const targetPath = isLoginMode ? '/api/auth/login' : '/api/auth/register';
+
+      try {
+        const response = await fetch(targetPath, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: userInp, password: pwdInp })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.ok) {
+          if (isLoginMode) {
+            defToast(data.msg || "驗證成功！正在登入...", "ok");
+            // 🔴 核心儲存：將後端核發的 JWT 通票鎖進瀏覽器口袋中
+            localStorage.setItem('trading_jwt_token', data.token);
+            
+            // 延遲 1.2 秒跳轉，讓使用者看清成功動畫
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 1200);
+          } else {
+            defToast(data.msg || "註冊成功！已自動為您切換回登入畫面", "ok");
+            toggleAuthMode(); // 註冊成功後自動切回登入
+            document.getElementById('password').value = ""; // 清空密碼
+          }
+        } else {
+          defToast(data.msg || "驗證失敗，請檢查輸入內容", "err");
+        }
+      } catch (err) {
+        console.error("Auth 連線異常:", err);
+        defToast("無法連接至戰情中心伺服器，請確認後端是否啟動", "err");
+      }
+    }
+  </script>
+</body>
+</html>
