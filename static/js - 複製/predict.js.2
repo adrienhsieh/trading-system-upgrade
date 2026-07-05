@@ -1,13 +1,17 @@
+// ── Predict ────────────────────────────────────────────────
 async function loadPredictionHistoryTable(){
   try {
-    const r = await api('GET', '/api/predict/history');
+    const r = await api('GET', '/api/predict/history');  // ✅ 使用 app.js 的 api()
     const history = r.history || [];
     const table = document.getElementById('predict-history');
+    if (!table) return;
+
     table.innerHTML = '';
     if(history.length === 0){
       table.innerHTML = '<tr><td colspan="4">尚無歷史紀錄</td></tr>';
       return;
     }
+
     history.forEach(item=>{
       const row = document.createElement('tr');
       row.innerHTML = `
@@ -25,19 +29,7 @@ async function loadPredictionHistoryTable(){
 
 async function runPrediction(code, strategy){
   try {
-    const r = await api('POST', '/api/predict/calculate', {code, strategy});
-    console.log('預測結果:', r);
-    toast(`預測完成：${code} (${strategy})`, 'ok');
-  } catch(e){
-    console.error('預測計算失敗:', e);
-    toast('預測失敗', 'error');
-  }
-}
-
-
-async function runPrediction(code, strategy){
-  try {
-    const r = await api('POST', '/api/predict/calculate', {code, strategy});
+    const r = await api('POST', '/api/predict/calculate', {code, strategy}); // ✅ 使用 api()
     console.log('預測結果:', r);
     toast(`預測完成：${code} (${strategy})`, 'ok');
   } catch(e){

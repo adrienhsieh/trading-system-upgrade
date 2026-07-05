@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Trading System Dashboard</title>
+</head>
+<body>
+  <h1>Trading System Dashboard</h1>
+  <div id="market"></div>
+  <div id="news"></div>
+  <div id="prediction"></div>
+
+  <script>
+    // 行情 API
+    fetch("/api/market").then(r => r.json()).then(data => {
+      document.getElementById("market").innerText = JSON.stringify(data.market, null, 2);
+    });
+
+    // 新聞 API
+    fetch("/api/news").then(r => r.json()).then(data => {
+      document.getElementById("news").innerText = JSON.stringify(data.news, null, 2);
+    });
+
+    // SSE 預測 stream
+    const evtSource = new EventSource("/api/prediction/stream");
+    evtSource.onmessage = function(e) {
+      document.getElementById("prediction").innerText = e.data;
+    };
+  </script>
+</body>
+</html>

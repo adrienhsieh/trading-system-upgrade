@@ -1,0 +1,57 @@
+import sqlite3
+from datetime import datetime
+
+# 模擬三通道擷取函式
+def fetch_market_data_batch(targets):
+    results = []
+    for t in targets:
+        results.append({
+            "query_date": datetime.now().strftime("%Y-%m-%d"),
+            "query_time": datetime.now().strftime("%H:%M:%S"),
+            "stock_code": t,
+            "data_source": "TWSE_Official",
+            "price": 500.0,
+            "volume": 1000
+        })
+    return results
+
+
+class GlobalStorageManager:
+    @classmethod
+    def save_ticks_to_cache(cls, batch_results: list):
+        if not batch_results:
+            return
+            
+        conn = sqlite3.connect("db/ohlcv_cache.db", timeout=30.0)
+        conn.execute("PRAGMA journal_mode=WAL;")
+        cursor = conn.cursor()
+        
+        try:
+            for item in batch_results:
+                cursor.execute("""
+                    INSERT INTO intraday_ticks (timestamp, ticker, data_source, price, volume)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (
+                    f"{item['query_date']} {item['query_time']}",
+                    item['stock_code'],
+                    item['data_source'],
+                    item['price'],
+                    item['volume']
+                ))
+            conn.commit()
+            print(f"   🤖 [Worker] 成功同步 {len(batch_results)} 筆多通道 Tick 數據至全域快取庫。")
+        except Exception as e:
+            conn.rollback()
+            print(f"   ❌ [Worker] 寫入全域即時庫失敗: {e}")
+        finally:
+            conn.close()
+
+
+def run_worker(targets):
+    batch_results = fetch_market_data_batch(targets)
+    GlobalStorageManager.save_ticks_to_cache(batch_results)
+
+
+if __name__ == "__main__":
+    targets = ["2330", "2317", "2454"]
+    run_worker(targets)

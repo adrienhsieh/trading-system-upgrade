@@ -1,0 +1,305 @@
+"""
+trading/services/container.py — 系統服務容器
+集中管理所有服務物件，提供 API 層統一入口
+"""
+
+import sqlite3
+
+from trading.services.positions import PositionManager
+from trading.services.configs import ConfigManager
+from trading.services.indicators import IndicatorEngine
+from trading.services.strategy_compositor import StrategyCompositor
+
+# 掃描器放在 trading/scanner.py
+from trading.scanner import StockScanner
+
+
+# ── 其他服務暫時建立空白類別，避免 AttributeError ──
+class MarketService:
+    def __init__(self):
+        self.status = "initialized"
+
+class NewsAggregator:
+    def __init__(self):
+        self.status = "initialized"
+
+#class IntelligenceDaemon:
+#    def __init__(self):
+#        self.status = "initialized"
+
+class IntelligenceDaemon:
+    def __init__(self):
+        self.status = "initialized"
+
+    def start(self):
+        # 暫時只記錄 log，之後再補上真正的啟動邏輯
+        from trading.logger import get_logger
+        logger = get_logger("intel_daemon")
+        logger.info("IntelligenceDaemon 已啟動 (stub)")
+        self.status = "running"
+
+    def stop(self):
+        from trading.logger import get_logger
+        logger = get_logger("intel_daemon")
+        logger.info("IntelligenceDaemon 已停止 (stub)")
+        self.status = "stopped"
+
+class CoverageReader:
+    def __init__(self):
+        self.status = "initialized"
+
+class OhlcvDaemon:
+    def __init__(self):
+        self.status = "initialized"
+
+    def start(self):
+        from trading.logger import get_logger
+        logger = get_logger("ohlcv_daemon")
+        logger.info("OhlcvDaemon 已啟動 (stub)")
+        self.status = "running"
+
+    def stop(self):
+        from trading.logger import get_logger
+        logger = get_logger("ohlcv_daemon")
+        logger.info("OhlcvDaemon 已停止 (stub)")
+        self.status = "stopped"
+
+class MarketService:
+    def __init__(self):
+        self.status = "initialized"
+
+    def start(self):
+        from trading.logger import get_logger
+        logger = get_logger("market_svc")
+        logger.info("MarketService 已啟動 (stub)")
+        self.status = "running"
+
+    def stop(self):
+        from trading.logger import get_logger
+        logger = get_logger("market_svc")
+        logger.info("MarketService 已停止 (stub)")
+        self.status = "stopped"
+
+    def refresh(self):
+        from trading.logger import get_logger
+        import time
+        logger = get_logger("market_svc")
+        logger.info("MarketService refresh() 被呼叫 (stub)")
+        # 模擬更新行情快取
+        self._cache = {
+            "timestamp": time.time(),
+            "message": "行情快取已更新 (stub)"
+        }
+        return self._cache
+    def get_data(self):
+        # 提供 API 呼叫用的資料
+        if not self._cache:
+            self.refresh()
+        return self._cache
+
+class NewsAggregator:
+    def __init__(self):
+        self.status = "initialized"
+        self._cache = []
+
+    def start(self):
+        from trading.logger import get_logger
+        logger = get_logger("news_agg")
+        logger.info("NewsAggregator 已啟動 (stub)")
+        self.status = "running"
+
+    def stop(self):
+        from trading.logger import get_logger
+        logger = get_logger("news_agg")
+        logger.info("NewsAggregator 已停止 (stub)")
+        self.status = "stopped"
+
+    def refresh(self):
+        from trading.logger import get_logger
+        import time
+        logger = get_logger("news_agg")
+        logger.info("NewsAggregator refresh() 被呼叫 (stub)")
+        # 模擬更新新聞快取
+        self._cache = [
+            {"title": "台股今日震盪走高", "timestamp": time.time()},
+            {"title": "半導體族群持續吸引資金", "timestamp": time.time()}
+        ]
+        return self._cache
+
+    def fetch(self):
+        # 提供 API 呼叫用的新聞資料
+        if not self._cache:
+            self.refresh()
+        return self._cache
+
+class CoverageReader:
+    def __init__(self):
+        self.status = "initialized"
+    def start(self): self.status = "running"
+    def stop(self): self.status = "stopped"
+
+
+
+class Container:
+    def __init__(self):
+        self.pos_mgr = PositionManager()
+        self.config_mgr = ConfigManager()
+        self.ind_engine = IndicatorEngine()
+
+        # 掃描器
+        self.scanner = StockScanner(self.ind_engine)
+
+        # 其他服務（stub）
+        self.market_svc = MarketService()
+        self.news_agg = NewsAggregator()
+        self.intel_daemon = IntelligenceDaemon()
+        self.coverage_reader = CoverageReader()
+        self.ohlcv_daemon = OhlcvDaemon()   # ✅ 新增 OHLCV Daemon
+
+        # 策略組裝器工廠方法
+        def create_strategy_compositor(user_db_path: str):
+            user_db = sqlite3.connect(user_db_path)
+            user_db.row_factory = sqlite3.Row
+            return StrategyCompositor(user_db)
+
+        self.strategy_compositor_factory = create_strategy_compositor
+
+
+#class Container:
+#    def __init__(self):
+#        # 原有服務
+#        self.pos_mgr = PositionManager()
+#        self.config_mgr = ConfigManager()
+#        self.ind_engine = IndicatorEngine()
+#
+#        # 掃描器
+#        self.scanner = StockScanner(self.ind_engine)
+#
+#        # 其他服務（暫時空白）
+#        self.market_svc = MarketService()
+#        self.news_agg = NewsAggregator()
+#        self.intel_daemon = IntelligenceDaemon()
+#        self.coverage_reader = CoverageReader()
+#
+#        # 策略組裝器工廠方法
+#        def create_strategy_compositor(user_db_path: str):
+#            user_db = sqlite3.connect(user_db_path)
+#            user_db.row_factory = sqlite3.Row
+#            return StrategyCompositor(user_db)
+
+        self.strategy_compositor_factory = create_strategy_compositor
+
+
+# 建立全域 container 物件
+container = Container()
+
+
+
+# #"""
+# #trading/services/container.py — 系統服務容器
+# #集中管理所有服務物件，提供 API 層統一入口
+# #"""
+# #
+# #import sqlite3
+# #
+# ## 原本的服務管理器
+# #from trading.services.positions import PositionManager
+# #from trading.services.configs import ConfigManager
+# #from trading.services.indicators import IndicatorEngine
+# #
+# ## 新增的策略組裝器
+# #from trading.services.strategy_compositor import StrategyCompositor
+# #
+# #
+# #class Container:
+# #    def __init__(self):
+# #        # 原有服務
+# #        self.pos_mgr = PositionManager()
+# #        self.config_mgr = ConfigManager()
+# #        self.ind_engine = IndicatorEngine()
+# #
+# #        # 新增策略組裝器工廠方法
+# #        # 使用者資料庫路徑由 API 傳入
+# #        def create_strategy_compositor(user_db_path: str):
+# #            user_db = sqlite3.connect(user_db_path)
+# #            user_db.row_factory = sqlite3.Row
+# #            return StrategyCompositor(user_db)
+# #
+# #        self.strategy_compositor_factory = create_strategy_compositor
+# #
+# #
+# ## 建立全域 container 物件
+# #container = Container()
+# #
+# # import sqlite3
+# # 
+# # from trading.services.positions import PositionManager
+# # from trading.services.configs import ConfigManager
+# # from trading.services.indicators import IndicatorEngine
+# # 
+# # # 從獨立檔案匯入 StrategyCompositor
+# # from trading.services.strategy_compositor import StrategyCompositor
+# # 
+# # 
+# # class Container:
+# #     def __init__(self):
+# #         self.pos_mgr = PositionManager()
+# #         self.config_mgr = ConfigManager()
+# #         self.ind_engine = IndicatorEngine()
+# # 
+# #         def create_strategy_compositor(user_db_path: str):
+# #             user_db = sqlite3.connect(user_db_path)
+# #             user_db.row_factory = sqlite3.Row
+# #             return StrategyCompositor(user_db)
+# # 
+# #         self.strategy_compositor_factory = create_strategy_compositor
+# # 
+# # 
+# # container = Container()
+# # 
+# """
+# trading/services/container.py — 系統服務容器
+# 集中管理所有服務物件，提供 API 層統一入口
+# """
+# 
+# import sqlite3
+# 
+# from trading.services.positions import PositionManager
+# from trading.services.configs import ConfigManager
+# from trading.services.indicators import IndicatorEngine
+# 
+# # 新增的服務模組（請確認這些檔案存在）
+# from trading.services.strategy_compositor import StrategyCompositor
+# from trading.services.scanner import ScannerService
+# from trading.services.market import MarketService
+# from trading.services.news import NewsAggregator
+# from trading.services.intelligence import IntelligenceDaemon
+# from trading.services.coverage import CoverageReader
+# 
+# from trading.scanner import StockScanner
+# 
+# class Container:
+#     def __init__(self):
+#         self.pos_mgr = PositionManager()
+#         self.config_mgr = ConfigManager()
+#         self.ind_engine = IndicatorEngine()
+# 
+#         # 掃描器
+#         self.scanner = StockScanner(self.ind_engine)
+#         self.market_svc = MarketService()
+#         self.news_agg = NewsAggregator()
+#         self.intel_daemon = IntelligenceDaemon()
+#         self.coverage_reader = CoverageReader()
+# 
+#         # 策略組裝器工廠方法
+#         def create_strategy_compositor(user_db_path: str):
+#             user_db = sqlite3.connect(user_db_path)
+#             user_db.row_factory = sqlite3.Row
+#             return StrategyCompositor(user_db)
+# 
+#         self.strategy_compositor_factory = create_strategy_compositor
+# 
+# 
+# # 建立全域 container 物件
+# container = Container()
+

@@ -1,0 +1,11 @@
+@echo off
+REM test_prediction.bat — 用 curl 測試 API
+REM set TOKEN=<在這裡貼上 gen_token.py 印出的 JWT Token>
+set TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODMwOTM5MTIsImlhdCI6MTc4MzAwNzUxMiwidXNlcl9pZCI6InRlc3QiLCJ1c2VyX2FwaV9rZXkiOiI1ZDM2ODU3YWNjYjU3ZGY5OGZmYWIxM2RhZTdkZTU3Nzg4ZTU5OWM1MGE5NjY2OWU5ZmJjODE4MjMxMzE3MzA0In0._3ig5pyLp5VIf5klx5QmqLSyqRnNJMMvlhT4WB63q2c
+
+echo Test /api/prediction/test
+curl -H "Authorization: Bearer %TOKEN%" "http://localhost:5000/api/prediction/test?ticker=2330^&user_id=test"
+
+echo.
+echo Test /api/prediction/stream
+curl -H "Authorization: Bearer %TOKEN%" --no-buffer "http://localhost:5000/api/prediction/stream?ticker=2330^&user_id=test"

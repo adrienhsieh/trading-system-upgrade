@@ -4,14 +4,28 @@ trading/api/auth.py — API 認證與輸入驗證輔助
 import functools
 import hmac
 import re
-import json
-import os
-from pathlib import Path
+
 from flask import jsonify, request
 
+def require_auth(f):
+    @functools.wraps(f)
+    def decorated(*args, **kwargs):
+        # 🟢 關鍵修正：換成新網址前綴 /api/user_page_config 的白名單放行
+        if request.path.startswith("/api/user_page_config"):
+            return f(*args, **kwargs)
+
+        key      = request.headers.get("X-API-Key") or request.args.get("key", "")
+        expected = _get_api_key()
+        if not expected or not hmac.compare_digest(key, expected):
+            return jsonify({"ok": False, "error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
 
 def _get_api_key() -> str:
     """讀取 api_key。支援 TRADING_CONFIG_PATH env var 覆寫（測試用）。"""
+    import json
+    import os
+    from pathlib import Path
     try:
         cfg_path_env = os.environ.get("TRADING_CONFIG_PATH", "")
         # trading/api/auth.py → trading/api/ → trading/ → project root
@@ -25,36 +39,21 @@ def _get_api_key() -> str:
     return ""
 
 
-#def require_auth(f):
-#    """裝飾器：驗證 X-API-Key header 或 key query param。
-#       特定路由（如 /api/config, /api/user_page_config）白名單放行。
-#    """
-#    @functools.wraps(f)
-#    def decorated(*args, **kwargs):
-#        # 白名單路由：不需驗證
-#        if request.path.startswith("/api/config") or request.path.startswith("/api/user_page_config"):
-#            return f(*args, **kwargs)
-#
-#        key      = request.headers.get("X-API-Key") or request.args.get("key", "")
-#        expected = _get_api_key()
-#        if not expected or not hmac.compare_digest(key, expected):
-#            return jsonify({"ok": False, "error": "Unauthorized"}), 401
-#        return f(*args, **kwargs)
-#    return decorated
-
-from flask import request, jsonify
-from functools import wraps
-
 def require_auth(f):
-    @wraps(f)
+    """裝飾器：驗證 X-API-Key header 或 key query param。"""
+    @functools.wraps(f)
     def decorated(*args, **kwargs):
-        auth_header = request.headers.get("Authorization", "")
-        # 統一檢查 Bearer 格式
-        if auth_header != "Bearer test-token":
+        # 🟢 關鍵新增：如果是網頁設定相關的 API 路由，直接跳過驗證放行
+        # 未來這部分的安全性將會交給您專屬的網頁登入 Token 驗證器處理
+        if request.path.startswith("/api/config"):
+            return f(*args, **kwargs)
+
+        key      = request.headers.get("X-API-Key") or request.args.get("key", "")
+        expected = _get_api_key()
+        if not expected or not hmac.compare_digest(key, expected):
             return jsonify({"ok": False, "error": "Unauthorized"}), 401
         return f(*args, **kwargs)
     return decorated
-
 
 
 def validate_code(code: str):

@@ -15,73 +15,18 @@ function initTheme() {
 // Apply saved theme on load
 initTheme();
 
-
-// ── 💡 關鍵新增：模擬當前登入的使用者身份 ──────────────────────
-// 未來若做好了真正的註冊登入，直接動態將此變數換成登入者的 user_id 即可
-let CURRENT_USER_ID = "jack"; 
-let CURRENT_MODULE_ID = "settings_page"; // 標記這個網頁模組的固定識別碼
-
-
 // ── Settings ─────────────────────────────────────────────────
-async function runScanner(){
-  try {
-    const r = await api('GET', '/api/market');
-    const market = r.market || {};
-    // 渲染掃描結果...
-  } catch(e){
-    console.error('執行掃描失敗:', e);
-  }
-}
-
 async function openSettings(){
-  // // 🟢 修正點：將原本的 /api/config 改成呼叫我們新架設的 /api/user_config
-  // // 並且在網址後面用 query 參數帶上目前的 user_id 與 module_id
-  // const url = `/api/user_config?user_id=${encodeURIComponent(CURRENT_USER_ID)}&module_id=${encodeURIComponent(CURRENT_MODULE_ID)}`;
-  // const response = await api('GET', url);
-  // 
-  // // 💡 注意：依照後端 API 的設計格式，成功的資料會包在 response.data 裡面
-  // const r = response.ok ? response.data : {};
-  // 
-  // // 如果資料庫中還沒有設定，給予預設值保底
-  // document.getElementById('s-capital').value = r.total_capital || 3000000;
-  // document.getElementById('s-consec').value = r.consecutive_losses || 0;
-  // document.getElementById('s-theme').value = localStorage.getItem('trading_theme') || 'light';
-  // document.getElementById('settings-modal').classList.add('open');
-  const url = `/api/user_page_config?user_id=${CURRENT_WEB_USER}&module_id=${SETTINGS_MODULE_ID}`;
-  const response = await api('GET', url);
-  
-  // 💡 安全解包：如果 response 本身就是資料，或者包在 response.data 裡，進行安全相容性保底
-  const r = response.data ? response.data : (response.ok ? response : response);
-  
-  document.getElementById('s-capital').value = r.total_capital || 3000000;
-  document.getElementById('s-consec').value = r.consecutive_losses || 0;
-  document.getElementById('s-theme').value = localStorage.getItem('trading_theme') || 'light';
+  const r=await api('GET','/api/config');
+  document.getElementById('s-capital').value=r.total_capital||3000000;
+  document.getElementById('s-consec').value=r.consecutive_losses||0;
+  document.getElementById('s-theme').value=localStorage.getItem('trading_theme')||'light';
   document.getElementById('settings-modal').classList.add('open');
 }
-
 async function saveSettings(){
-  const updatedConfigs = {
-    total_capital: parseInt(document.getElementById('s-capital').value),
-    consecutive_losses: parseInt(document.getElementById('s-consec').value)
-  };
-
-  const payload = {
-    user_id: CURRENT_WEB_USER,
-    module_id: SETTINGS_MODULE_ID,
-    configs: updatedConfigs
-  };
-
-  // 🟢 修正點：對齊全新獨立儲存路徑 /api/user_page_config/save
-  const r = await api('POST', '/api/user_page_config/save', payload);
-  
-  if(r.ok || r.message === "儲存成功"){ 
-    toast('✓ 設定已儲存','ok'); 
-    closeModal('settings-modal'); 
-    if (typeof loadPositions === 'function') loadPositions(); 
-  }
-  else {
-    toast('儲存失敗','err');
-  }
+  const r=await api('POST','/api/config',{total_capital:parseInt(document.getElementById('s-capital').value),consecutive_losses:parseInt(document.getElementById('s-consec').value)});
+  if(r.ok){ toast('✓ 設定已儲存','ok'); closeModal('settings-modal'); loadPositions(); }
+  else toast('儲存失敗','err');
 }
 
 // ── Strategy Settings ────────────────────────────────────────
@@ -128,7 +73,6 @@ function renderStratSettingsModal(params){
     const meta   = STRAT_META[strat];
     const sParam = params[strat] || {};
     const el     = document.getElementById('ss-'+strat);
-    if (!el) return; // 💡 確保安全，防止找不到 DOM 元素
     el.innerHTML = Object.entries(meta).map(([key, m])=>{
       const sp      = sParam[key] || {};
       const enabled = sp.enabled !== false;
@@ -158,10 +102,8 @@ function renderStratSettingsModal(params){
 }
 
 function ssToggle(strat, key, checked){
-  const el = document.getElementById('ss-'+strat+'-'+key);
-  if (!el) return;
-  const row = el.closest('.sig-row');
-  if (row) row.classList.toggle('disabled', !checked);
+  const row = document.getElementById('ss-'+strat+'-'+key).closest('.sig-row');
+  row.classList.toggle('disabled', !checked);
 }
 
 function collectStratParams(){

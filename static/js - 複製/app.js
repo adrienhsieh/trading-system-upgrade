@@ -1,4 +1,20 @@
 // ── Helpers ─────────────────────────────────────────────────
+function getApiKey(){ return 'test-token'; }
+
+async function api(method, path, body, signal){
+  const opts = { 
+    method, 
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization': `Bearer ${getApiKey()}`
+    } 
+  };
+  if (body) opts.body = JSON.stringify(body);
+  if (signal) opts.signal = signal;
+  const r = await fetch(path, opts);
+  if(r.status===401) throw new Error('Unauthorized');
+  return r.json();
+
 function getApiKey(){ 
   // 固定使用伺服器啟動時顯示的 API Key
   return 'test-token'; 

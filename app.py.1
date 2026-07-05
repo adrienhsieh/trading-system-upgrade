@@ -1,0 +1,97 @@
+"""
+app.py — Flask 應用程式進入點
+路由分散於 trading/api/ Blueprint 模組；服務單例統一由 trading/services/container.py 管理。
+啟動方式：python run.py
+"""
+import logging
+import os
+from pathlib import Path
+
+from flask import Flask, send_from_directory
+from flask_cors import CORS
+
+from trading.api import register_blueprints
+from trading.api.extensions import limiter
+from trading.exceptions import TradingSystemError
+from trading.services.config_db import init_db
+from trading.api.admin_ui import init_admin_web_ui
+
+# ── backward-compat：讓 run.py 可以繼續 from app import config_mgr, ... ──
+from trading.services.container import container as _container
+config_mgr      = _container.config_mgr
+pos_mgr         = _container.pos_mgr
+ind_engine      = _container.ind_engine
+scanner         = _container.scanner
+# 尚未完成的服務先註解掉，避免 AttributeError
+# market_svc      = _container.market_svc
+# news_agg        = _container.news_agg
+# intel_daemon    = _container.intel_daemon
+# coverage_reader = _container.coverage_reader
+
+BASE_DIR = Path(__file__).parent
+_logger  = logging.getLogger("trading.app")
+
+# ── SQLite 初始化 ─────────────────────────────────────────────
+try:
+    init_db()
+    _logger.info("SQLite 網頁獨立設定資料庫初始化成功。")
+except Exception as e:
+    _logger.error("SQLite 初始化失敗: %s", e, exc_info=True)
+
+#── Flask 應用 ─────────────────────────────────────────────────    
+app = Flask(__name__, static_folder=str(BASE_DIR), static_url_path="")
+
+# 💡 加入 secret_key，避免 Session 500 錯誤
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "trading_system_opus_secure_key_2026")
+
+_allowed_origin = os.environ.get("CORS_ORIGIN", "http://localhost:8787")
+CORS(app, resources={r"/api/*": {"origins": [_allowed_origin]}})
+limiter.init_app(app)
+
+# ── 註冊所有 API blueprint ───────────────────────────────────
+register_blueprints(app)
+
+# ── 啟動 Admin 後台 ──────────────────────────────────────────
+init_admin_web_ui(app)
+
+# ── 靜態頁面 ───────────────────────────────────────────────────
+@app.route("/")
+def index():
+    real_path = os.path.abspath(os.path.join(str(BASE_DIR), "index.html"))
+    print(f"\n📢 [重要情報] 戰情中心目前真正在背景讀取的 index.html 絕對路徑為:\n👉 {real_path}\n")
+    
+    response = send_from_directory(str(BASE_DIR), "index.html")
+    response.headers["Location"] = ""  # 強制移除轉向
+    response.status_code = 200
+    return response
+
+@app.route("/mockup")
+def mockup():
+    return send_from_directory(str(BASE_DIR / "docs"), "mockup-recorder.html")
+
+# ── Security headers ──────────────────────────────────────────
+@app.after_request
+def set_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    return response
+
+# ── 全域 error handler ────────────────────────────────────────
+@app.errorhandler(TradingSystemError)
+def handle_trading_error(e: TradingSystemError):
+    _logger.error("TradingSystemError: %s", e, exc_info=True)
+    return __import__("flask").jsonify({"ok": False, "error": "系統發生錯誤，請稍後再試"}), 500
+
+@app.errorhandler(500)
+def handle_500(e):
+    _logger.error("Unhandled 500: %s", e, exc_info=True)
+    return __import__("flask").jsonify({"ok": False, "error": "內部伺服器錯誤"}), 500
+
+# ── 開發模式啟動 ─────────────────────────────────────────────
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
+    print(f"\n⚔️  戰情指揮中心（開發模式已啟動雙 Port 物理隔離架構）")
+    print(f"   👉 交易系統主首頁: http://localhost:{port}/")
+    print(f"   👉 獨立資料庫管理後台: http://localhost:{port}/admin\n")
+    print("   正式啟動請使用：python app.py 或是 python run.py")
+    app.run(host="0.0.0.0", port=port, debug=True, threaded=True)
