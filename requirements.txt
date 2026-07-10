@@ -74,3 +74,10 @@ Werkzeug==3.1.8
 wrapt==2.2.1
 WTForms==3.2.2
 yfinance==1.4.1
+cryptography==42.0.5
+openpyxl==3.1.2
+
+# ── THSR 高鐵訂票頁簽（手動輸入驗證碼版）─────────────────────
+opencv-python-headless>=4.5
+scikit-learn>=1.0
+Pillow>=9.0

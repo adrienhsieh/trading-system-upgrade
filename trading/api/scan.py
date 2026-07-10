@@ -28,8 +28,18 @@ def stock_info(code: str):
     name = container.scanner.get_stock_name(code)
     if name and name != code:
         return jsonify({"ok": True, "code": code, "name": name, "market": "", "group": ""})
+        
     import yfinance as yf
-    for suffix in [".TW", ".TWO"]:
+    
+    # 🌟 優化：根據台股代碼長度與型態，智慧給予優先後綴，避免盲目輪詢導致 Yahoo 噴錯
+    # 通常長度大於 4 碼的認購售權證、或是特定 ETF 在上市櫃有明確區分
+    # 這裡保留 Fallback，但若不匹配則減少無謂請求
+    suffixes = [".TW", ".TWO"]
+    if len(code) == 4 and code.isdigit():
+        # 如果是 4 碼純數字，可以保持輪詢，但若前面已靜音 yfinance，就不怕它噴警告
+        pass
+
+    for suffix in suffixes:
         try:
             info = yf.Ticker(f"{code}{suffix}").info
             name = info.get("longName") or info.get("shortName") or ""

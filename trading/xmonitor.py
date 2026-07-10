@@ -23,7 +23,7 @@ import requests
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "intelligence.db")
 
 GROK_API_URL  = "https://api.x.ai/v1/chat/completions"
-GROK_MODEL    = "grok-2-latest"
+GROK_MODEL    = "grok-4.3"  # xAI 目前建議的一般對話/分析預設模型（舊版 grok-2-latest 已停用，會回 400）
 
 GOOGLE_NEWS_RSS = "https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
 

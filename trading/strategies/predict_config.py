@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 15大台股核心訊號加權配置表 (可自行在此增減指標或調整權重分數)
 專案路徑: D:\SourceCode\TypeScript\trading-system-main\trading\strategies\predict_config.py
 """

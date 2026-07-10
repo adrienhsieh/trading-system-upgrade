@@ -1,15 +1,28 @@
 # trading/api/user_config.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, g
 from trading.services.config_db import SessionLocal, UserPageConfig, DEFAULT_MODULE_CONFIGS
+from trading.api.utils import decode_token
 
 # 🟢 核心修正：改用獨立的 URL 前綴 /api/user_page_config，徹底避開大總管設定的干擾
 user_setting_bp = Blueprint("user_page_settings", __name__, url_prefix="/api/user_page_config")
 
+
+def _resolve_user_id(fallback: str = None) -> str:
+    """若帶有效 JWT，優先以登入身分作為 user_id（多人登入時彼此隔離）；
+    否則相容舊版直接由前端傳入 user_id 的行為。"""
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        payload = decode_token(auth_header.split(" ", 1)[1].strip())
+        if payload:
+            return payload.get("username") or str(payload.get("user_id"))
+    return fallback
+
+
 @user_setting_bp.route("", methods=["GET"])
 def get_user_page_config():
-    user_id = request.args.get("user_id")
     module_id = request.args.get("module_id")
-    
+    user_id = _resolve_user_id(request.args.get("user_id"))
+
     if not user_id or not module_id:
         return jsonify({"ok": False, "error": "缺少參數 user_id 或 module_id"}), 400
         
@@ -30,10 +43,10 @@ def get_user_page_config():
 @user_setting_bp.route("/save", methods=["POST"])
 def save_user_page_config():
     data = request.get_json() or {}
-    user_id = data.get("user_id")
     module_id = data.get("module_id")
     configs = data.get("configs")
-    
+    user_id = _resolve_user_id(data.get("user_id"))
+
     if not user_id or not module_id or configs is None:
         return jsonify({"ok": False, "error": "資料欄位不完整"}), 400
         

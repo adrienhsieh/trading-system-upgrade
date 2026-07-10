@@ -1,0 +1,977 @@
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta name="description" content="台灣高鐵網路訂票，不論商務出差或出遊旅行，隨訂即出發，探索在地美好！✓ 空位車次查詢 ✓ 票價查詢 ✓ 車票預訂與線上付款 ✓ 訂位紀錄查詢/管理 ✓ 商務車廂座位選位 ✓ 下載T-EX app快速取得手機票證">
+        <!-- TEMP: -->
+        <!-- 
+        <meta name="robots" content="noindex, nofollow">
+        -->
+
+        <!-- Open Graph Meta -->
+        <meta property="og:type" content="website" />
+        <meta property="og:locale" content="zh-Hant" />
+        <meta property="og:site_name" content="台灣高鐵網路訂票 | 台灣高鐵" />
+        <meta property="og:title" content="台灣高鐵網路訂票 | 台灣高鐵" />
+        <meta property="og:description" content="台灣高鐵網路訂票，不論商務出差或出遊旅行，隨訂即出發，探索在地美好！✓ 空位車次查詢 ✓ 票價查詢 ✓ 車票預訂與線上付款 ✓ 訂位紀錄查詢/管理 ✓ 商務車廂座位選位 ✓ 下載T-EX app快速取得手機票證" />
+        <meta property="og:url" wicket:message="content=homePageLink" content="https://irs.thsrc.com.tw"/>
+        <meta property="og:image" content="https://sorrypage-thsrc.cdn.hinet.net/IRS/logo.svg"/>
+
+        <!-- Favicon -->
+        <link sizes="120x120" rel="icon" href="/IMINT/images/common/favicon.png"/>
+        <title>台灣高鐵網路訂票</title>
+
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+
+        <!-- Google Font -->
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+
+        <!-- Material Icons -->
+        <link href='https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined' rel='stylesheet'>
+
+        <!-- UIkit CSS -->
+        <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/css/uikit.min.css'/>
+
+        <!-- Flatpickr CSS -->
+        <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css'/>
+
+        <link rel="stylesheet" href="/IMINT/css/styles221005.css" type="text/css">
+        <link rel="stylesheet" href="/IMINT/css/rwd_calendar.css" type="text/css">
+        <link rel="stylesheet" href="/IMINT/css/taishin.css" type="text/css">
+    
+<!--         <meta http-equiv="content-language" content="zh-hant-tw"> -->
+        <link type="text/css" href="/IMINT/css/base/jquery-ui.css" rel="stylesheet" /><script type="text/javascript" src="/IMINT/js/jquery-3.7.1.min.js"></script><script type="text/javascript" src="/IMINT/js/jquery-migrate-3.4.1.min.js"></script><script type="text/javascript" src="/IMINT/js/jquery-ui-1.13.2.min.js"></script><script type="text/javascript" src="/IMINT/js/js.cookie.min.js"></script>
+
+        <!-- UIkit JS -->
+        <script src='https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/js/uikit.min.js'></script><script src='https://cdn.jsdelivr.net/npm/uikit@3.5.9/dist/js/uikit-icons.min.js'></script>
+
+        <!-- Flatpickr JS -->
+        <script src='https://cdn.jsdelivr.net/npm/flatpickr'></script>
+
+        <!-- Day JS -->
+        <script src='/IMINT/js/dayjs-zhTW.js'></script>
+
+        <!-- ================================= -->
+        <script id="tw-com-mitac-webapp-thsr-viewer-Home-0" type="text/javascript">
+            jQuery.browser = {};
+            (function () {
+                jQuery.browser.msie = false;
+                jQuery.browser.version = 0;
+                if (navigator.userAgent.match(/MSIE ([0-9]+)\./)) {
+                    jQuery.browser.msie = true;
+                    jQuery.browser.version = RegExp.$1;
+                }
+            })();
+        </script>
+        <script src="/IMINT/js/rwd_irs.2.17.min.js" type="text/javascript"></script>
+        <script id="tw-com-mitac-webapp-thsr-viewer-Home-1" type="text/javascript">
+            $(document).ready(function() {
+                // jQuery.blockUI
+                /*
+                $(':submit[id!=paidModifySubmit]:submit[id!=goBackTGO], #SubmitImage').click(function() {
+                    $.blockUI({ message: $('#BusyBoxDiv').html() });
+                });
+
+                // iOS系統  history.back 頁面不會刷新問題
+                $(window).bind("pageshow", function(event) {
+                    if (event.originalEvent.persisted) {
+                        window.location.reload();
+                    }
+                });
+
+                $(window).bind("unload", function(){
+                    $.unblockUI();
+                });
+                */
+
+                $(':submit[id!=paidModifySubmit]:submit[id!=goBackTGO], #SubmitImage').click(function() {
+                   displayMaskFrame();
+                });
+
+                // iOS系統  history.back 頁面不會刷新問題
+                $(window).bind("pageshow", function(event) {
+                    if (event.originalEvent.persisted) {
+                        window.location.reload();
+                    }
+                });
+
+                $(window).bind("load", function(){
+                    hideMaskFrame();
+                });
+
+                $(window).bind("unload", function(){
+                    hideMaskFrame();
+                });
+
+                // 控制錯誤訊息顯示區塊
+                if ($('#feedMSG li').length>0) {
+                     $('#divErrMSG').show();
+                } else {
+                    $('#divErrMSG').hide();
+                }
+            });
+
+            // 顯示遮罩畫面 - 遮罩UI show
+            function displayMaskFrame() {
+                var loadingMask = $("#loadingMask");
+                loadingMask.css({ "z-index": 999999});  //最上層 : 999999 - 1； opacity=透明度(def=1)
+                loadingMask.show();
+
+                var maskFrame = $("#divMaskFrame");
+                maskFrame.css({ "z-index": 999998, "opacity": 0.6 });  //最上層 : 999999 - 1； opacity=透明度(def=1)
+                maskFrame.show();
+            }
+
+            // 隱藏遮罩畫面
+            function hideMaskFrame() {
+                var loadingMask = $("#loadingMask");
+                loadingMask.css({ "z-index": 0});  //最上層 : 999999 - 1； opacity=透明度(def=1)
+                loadingMask.hide();
+
+                var maskFrame = $("#divMaskFrame");
+                maskFrame.css({ "z-index": 0, "opacity": 1 });  //最上層 : 999999 - 1； opacity=透明度(def=1)
+                maskFrame.hide();
+            }
+        </script>
+    
+        <script charset="UTF-8" src="/IMINT/js/GA/BookingS2GA.js" type="text/javascript"></script>
+        <script id="tw-com-mitac-webapp-thsr-viewer-BookingS2-0" type="text/javascript">
+            $(document).ready(function () {
+                $("#heroBG").hide();
+
+                DynamicPanels.load();
+            });
+        </script>
+    <script type="text/javascript" src="/IMINT/resources/wicket.ajax.AbstractDefaultAjaxBehavior/wicket-ajax.js"></script>
+<script >bazadebezolkohpepadr="1686742157"</script><script type="text/javascript" src="https://irs.thsrc.com.tw/akam/13/6489a76f"  defer></script></head>
+    <body id="mainBody">
+        <input name="idHash" id="idHash" type="hidden" value=""/>
+        <input name="dataLang" id="dataLang" type="hidden" value="zh"/>
+        <script type="text/javascript">
+            document.body.appendChild(Object.assign(document.createElement('script'), {
+                src: `https://${window.location.protocol === 'https:' ? 'ssl' : 'www'}.google-analytics.com/ga.js`,
+                async: true
+            }));
+        </script>
+        <!-- Google Tag Manager Start -->
+        <script>
+            !function(n,o){o.forEach(function(o){n[o]||((n.__alloyNS=n.__alloyNS||[])
+              .push(o),n[o]=function(){var u=arguments;return new Promise(function(i,l){
+                n.setTimeout(function(){n[o].q.push([i,l,u])})})},n[o].q=[])})}(window,["alloy"]);
+
+            var idHash = $('#idHash').val();
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                'event':'user_id',
+                'user_id':idHash //放入能接收到hash值的變數
+            })
+        </script>
+        <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-KCZ6KF6');</script>
+        <!-- Google Tag Manager End -->
+
+        <!-- Google Tag Manager (noscript) Start -->
+        <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KCZ6KF6"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+        <!-- Google Tag Manager (noscript) End -->
+
+        
+            <div class="hero-bg" id="heroBG" style="display: none;"></div>
+
+            <div id="BusyBoxDiv" style="display: none;">
+                <div id="loading" class="loading center" align="center">
+                    <div>
+                        <span>請稍候...</span>
+                    </div>
+                    <div class ="sp sp-circle"></div>
+                </div>
+            </div>
+
+            <!-- 遮罩UI: 整個畫面不可點選用 -->
+            <div id="divMaskFrame"></div>
+            <div id="loadingMask" class="loading center" align="center" style="display: none;">
+                <div>
+                    <span>請稍候...</span>
+                </div>
+                <div class ="sp sp-circle"></div>
+            </div>
+
+            <!----- header starts ----->
+            <header>
+                <nav class="uk-navbar uk-navbar-container uk-navbar-transparent" uk-navbar="mode: click">
+                    <!-- Navbar Left -->
+                    <div class="uk-navbar-left">
+                        <img src="https://sorrypage-thsrc.cdn.hinet.net/IRS/logo.svg" alt="" width="125">
+                    </div>
+
+                    <!-- Navbar Right -->
+                    <div class="uk-navbar-right">
+                        <!-- Desktop Menu -->
+                        <ul class="uk-navbar-nav uk-visible@s">
+                            <li>
+                                <a href="#">預訂車票</a>
+                                <div class="uk-navbar-dropdown" uk-dropdown>
+                                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                                        <li class="uk-active">
+                                            <a href="/IMINT/">一般訂票</a>
+                                        </li>
+                                        
+                                        
+                                        <li>
+                                            <a href="/IMINT/creditcard">信用卡優惠</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                <a href="#">管理訂位</a>
+                                <div class="uk-navbar-dropdown" uk-dropdown>
+                                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                                        <li>
+                                            <a href="/IMINT/?wicket:bookmarkablePage=:tw.com.mitac.webapp.thsr.viewer.History">訂位紀錄查詢、付款及修改</a>
+                                        </li>
+                                        <li>
+                                            <a href="/IMINT/?wicket:bookmarkablePage=:tw.com.mitac.webapp.thsr.viewer.QueryPNR">查詢訂位代號</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                            	<a href="#">交易/搭乘紀錄</a>
+                                <div class="uk-navbar-dropdown" uk-dropdown>
+                                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                                        <li>
+                                			<a href="https://ptis.thsrc.com.tw/ptis/" target="_blank">交易/搭乘紀錄查詢</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li>
+                                
+                                <div class="uk-navbar-dropdown" uk-dropdown>
+                                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                        <!-- Mobile Menu -->
+                        <button class="btn-toggleMobileMenu uk-hidden@s" uk-navbar-toggle-icon type="button" uk-toggle="target: #mobileMenu"></button>
+                        <div id="mobileMenu" uk-offcanvas="overlay: true; flip: true;">
+                            <div class="uk-offcanvas-bar">
+                                <button class="uk-offcanvas-close" type="button" uk-close></button>
+                                <div class="mobile-menu-content">
+                                    <ul class="uk-nav uk-nav-default">
+                                        <li class="uk-nav-header">
+                                            <span class="material-icons">search</span>預訂車票
+                                        </li>
+                                        <li class="uk-active">
+                                            <a href="/IMINT/">一般訂票</a>
+                                        </li>
+                                        
+                                        
+                                        <li>
+                                            <a href="/IMINT/creditcard">信用卡優惠</a>
+                                        </li>
+                                        <li class="uk-nav-divider"></li>
+                                        <li class="uk-nav-header ">
+                                            <span class="material-icons-outlined">edit</span>管理訂位
+                                        </li>
+                                        <li>
+                                            <a href="/IMINT/?wicket:bookmarkablePage=:tw.com.mitac.webapp.thsr.viewer.History">訂位紀錄查詢、付款及修改</a>
+                                        </li>
+                                        <li>
+                                            <a href="/IMINT/?wicket:bookmarkablePage=:tw.com.mitac.webapp.thsr.viewer.QueryPNR">查詢訂位代號</a>
+                                        </li>
+                                        <li class="uk-nav-divider"></li>
+                                        <li class="uk-nav-header ">
+                                            <span class="material-icons-outlined">payment</span>交易/搭乘紀錄
+                                        </li>
+                                        <li>
+                                            <a href="https://ptis.thsrc.com.tw/ptis/" target="_blank">交易/搭乘紀錄查詢</a>
+                                        </li>
+                                        <li class="uk-nav-divider"></li>
+                                        
+                                        <li>
+                                            
+                                        </li>
+                                        <li>
+                                            
+                                        </li>
+                                        <li>
+                                            
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- END: Mobile Menu -->
+                    </div>
+                </nav>
+            </header>
+            <!----- header ends ----->
+
+            
+            <div class="uk-container uk-container-small">
+                <!-- Stepper -->
+                <div class="stepper-wrapper">
+                    <div class="stepper uk-flex">
+                        <div class="step done">
+                            <p class="step-content">
+                                <span class="step-num">1.</span>
+                                <span class="step-text">查詢車次</span>
+                                <span class="step-num"></span>
+                            </p>
+                        </div>
+                        <div class="step divider">&mdash;</div>
+                        <div class="step current">
+                            <p class="step-content">
+                                <span class="step-num">2.</span>
+                                <span class="step-text">選擇車次</span>
+                            </p>
+                        </div>
+                        <div class="step divider">&mdash;</div>
+                        <div class="step">
+                            <p class="step-content">
+                                <span class="step-num">3.</span>
+                                <span class="step-text">取票資訊</span>
+                            </p>
+                        </div>
+                        <div class="step divider">&mdash;</div>
+                        <div class="step">
+                            <p class="step-content">
+                                <span class="step-num">4.</span>
+                                <span class="step-text">完成訂位</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!----- error message starts ----->
+                <div style="display: none;" id="divErrMSG" class="alert-group">
+                    <!-- Error Alert -->
+                    <div class="uk-alert-danger" uk-alert>
+                        <a class="uk-alert-close uk-close-large" uk-close></a>
+                        <div class="alert-content uk-flex" >
+                            <span class="material-icons icon-alert">error</span>
+                            <div id="feedMSG">
+                                <span>
+  
+</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!----- error message ends ----->
+
+                <!-- Main -->
+                <main class="step-2">
+                    <form action="/IMINT/?wicket:interface=:1:BookingS2Form::IFormSubmitListener" id="BookingS2Form" method="post"><div style="display:none"><input type="hidden" name="BookingS2Form:hf:0" id="BookingS2Form:hf:0" /></div>
+                        <!-- Info Alert -->
+                        <div uk-alert="" class="uk-alert-info">
+                            <div class="alert-content uk-flex">
+                                <span class="material-icons icon-alert">local_offer</span>
+                                <div>
+                                    <ul class="alert-body">
+                                        
+                                        
+                                        
+                                        <li>早鳥優惠僅適用於標準車廂對號座全票，且採<font style="color: #343436;font-weight: bold;">記名制，限本人搭乘持用</font>。</li>
+                                        
+                                        
+                                        
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Train List -->
+                        <section>
+                            <!-- Select Outbound -->
+                            <div class="card" id="BookingS2Form_TrainQueryDataViewPanel">
+    <div class="card-title-wrapper uk-flex uk-flex-bottom">
+        <h2 class="card-title">
+            <span>去程：</span>
+            <span class="stn-group">
+                (<span>台南</span><span class="material-icons">arrow_forward</span><span>嘉義</span>)
+            </span>
+        </h2>
+    </div>
+
+    <p class="date2"><span>2026/07/19</span> <span>(星期日)</span></p>
+    <div class="result-listing">
+        
+            <span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="06:46" QueryDepartureDate="07/19" QueryCode="802" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="06:29" checked="true" QueryEstimatedTime="0:17" type="radio" class="uk-radio" value="radio22">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">06:29</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">06:46</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:17</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">802</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                <p class="type early-bird"><span>早鳥8折</span></p>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span><span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="07:30" QueryDepartureDate="07/19" QueryCode="606" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="07:13" QueryEstimatedTime="0:17" type="radio" class="uk-radio" value="radio23">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">07:13</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">07:30</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:17</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">606</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                <p class="type early-bird"><span>早鳥9折</span></p>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span><span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="07:58" QueryDepartureDate="07/19" QueryCode="806" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="07:41" QueryEstimatedTime="0:17" type="radio" class="uk-radio" value="radio24">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">07:41</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">07:58</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:17</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">806</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                <p class="type early-bird"><span>早鳥8折</span></p>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span><span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="08:06" QueryDepartureDate="07/19" QueryCode="610" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="07:48" QueryEstimatedTime="0:18" type="radio" class="uk-radio" value="radio25">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">07:48</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">08:06</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:18</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">610</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span><span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="08:30" QueryDepartureDate="07/19" QueryCode="612" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="08:13" QueryEstimatedTime="0:17" type="radio" class="uk-radio" value="radio26">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">08:13</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">08:30</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:17</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">612</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span><span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="08:58" QueryDepartureDate="07/19" QueryCode="810" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="08:41" QueryEstimatedTime="0:17" type="radio" class="uk-radio" value="radio27">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">08:41</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">08:58</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:17</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">810</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span><span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="09:06" QueryDepartureDate="07/19" QueryCode="616" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="08:48" QueryEstimatedTime="0:18" type="radio" class="uk-radio" value="radio28">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">08:48</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">09:06</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:18</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">616</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span><span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="09:30" QueryDepartureDate="07/19" QueryCode="618" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="09:13" QueryEstimatedTime="0:17" type="radio" class="uk-radio" value="radio29">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">09:13</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">09:30</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:17</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">618</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span><span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="09:58" QueryDepartureDate="07/19" QueryCode="814" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="09:41" QueryEstimatedTime="0:17" type="radio" class="uk-radio" value="radio30">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">09:41</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">09:58</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:17</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">814</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span><span>
+                
+                <label class="uk-flex uk-flex-middle result-item">
+                    <div class="btn-radio" style="height: 6px;">
+                        <input QueryArrival="10:06" QueryDepartureDate="07/19" QueryCode="622" name="TrainQueryDataViewPanel:TrainGroup" QueryDeparture="09:48" QueryEstimatedTime="0:18" type="radio" class="uk-radio" value="radio31">
+                    </div>
+                    <div class="mobile-wrapper">
+                        <div class="uk-flex uk-flex-middle mobile-top">
+                            <div>
+                                <p class="departure-time">
+                                    <span id="QueryDeparture">09:48</span>
+                                    <span style="display: none;" id="QueryDepartureDate">07/19</span>
+                                </p>
+                            </div>
+                            <div class="uk-position-relative uk-flex uk-flex-middle">
+                                <span class="icon-direction material-icons">arrow_right_alt</span>
+                            </div>
+                            <div>
+                                <p class="arrival-time"><span id="QueryArrival">10:06</span></p>
+                            </div>
+                        </div>
+                        <div class="uk-flex uk-flex-middle mobile-bottom">
+                            <div class="duration">
+                                <span class="material-icons">schedule</span><span>0:18</span>
+                                <span class="divider">｜</span>
+                                <span class="material-icons-outlined">directions_railway</span><span id="QueryCode">622</span>
+                            </div>
+                            <div class="discount uk-flex">
+                                
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </label>
+            </span>
+        
+    </div>
+
+    <div id="PreAndLaterTrainContainer" class="result-ctrl uk-flex uk-flex-between">
+        <button id="BookingS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_preTrainLink" type="button" class="btn-load-earlier" onclick="var wcall=wicketAjaxGet('/IMINT/?wicket:interface=:1:BookingS2Form:TrainQueryDataViewPanel:PreAndLaterTrainContainer:preTrainLink::IBehaviorListener&wicket:behaviorId=0', function() { }, function() { });return !wcall;">
+            <span class="material-icons">chevron_left</span>
+            <span>更早車次</span>
+        </button>
+        <button id="BookingS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_laterTrainLink" type="button" class="btn-load-later" onclick="var wcall=wicketAjaxGet('/IMINT/?wicket:interface=:1:BookingS2Form:TrainQueryDataViewPanel:PreAndLaterTrainContainer:laterTrainLink::IBehaviorListener&wicket:behaviorId=0', function() { }, function() { });return !wcall;">
+            <span>更晚車次</span>
+            <span class="material-icons">chevron_right</span>
+        </button>
+    </div>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+            $('input[type=radio]:checked').parent().parent().css('fontWeight', 'bold');
+            $('input[type=radio]:checked').parent().parent().addClass('active');
+
+            $('input[type=radio]').click(function() {
+                DynamicPanels.radioOnClick(this);
+            });
+            $('input[type=radio]:checked').click();
+
+            if($("input[name='TrainQueryDataViewPanel:TrainGroup']:checked").size()==0){
+                //$('tr.trainDataView:eq(0)').hide();
+                $('div.ticket-card:eq(0)').parent().parent().hide();
+            }else{
+                //$('tr.trainDataView:eq(0)').show();
+                $('div.ticket-card:eq(0)').parent().parent().show();
+            }
+            if($("input[name='TrainQueryDataViewPanel2:TrainGroup']:checked").size()==0){
+                //$('tr.trainDataView:eq(1)').hide();
+                $('div.ticket-card:eq(1)').parent().parent().hide();
+            }else{
+                //$('tr.trainDataView:eq(1)').show();
+                $('div.ticket-card:eq(1)').parent().parent().show();
+            }
+
+            $('button#BookingS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_preTrainLink')
+            .add('button#BookingS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_laterTrainLink')
+            .add('button#HistoryDetailsModifyTripS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_preTrainLink')
+            .add('button#HistoryDetailsModifyTripS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_laterTrainLink')
+            .click(function(){
+                $('button#BookingS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_preTrainLink')
+                .add('button#BookingS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_laterTrainLink')
+                .add('button#HistoryDetailsModifyTripS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_preTrainLink')
+                .add('button#HistoryDetailsModifyTripS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_laterTrainLink').css('visibility', 'hidden');
+            });
+
+            $('button#BookingS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_preTrainLink')
+            .add('button#BookingS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_laterTrainLink')
+            .add('button#HistoryDetailsModifyTripS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_preTrainLink')
+            .add('button#HistoryDetailsModifyTripS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_laterTrainLink')
+            .click(function(){
+                $('button#BookingS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_preTrainLink')
+                .add('button#BookingS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_laterTrainLink')
+                .add('button#HistoryDetailsModifyTripS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_preTrainLink')
+                .add('button#HistoryDetailsModifyTripS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_laterTrainLink').css('visibility', 'hidden');
+            });
+
+            $('#BookingS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_preTrainLink')
+            .add('#BookingS2Form_TrainQueryDataViewPanel_PreAndLaterTrainContainer_laterTrainLink')
+            .add('#BookingS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_preTrainLink')
+            .add('#BookingS2Form_TrainQueryDataViewPanel2_PreAndLaterTrainContainer_laterTrainLink')
+            .bind("click", function(){
+                $.blockUI({ message: $('#BusyBoxDiv').html() });
+                setTimeout(function() { $.unblockUI(); }, 5000);
+            });
+
+            // Radio input checked styles
+            let outboundRadios = document.querySelectorAll('.step-2 input[name="TrainQueryDataViewPanel:TrainGroup"]');
+            let returnRadios = document.querySelectorAll('.step-2 input[name="TrainQueryDataViewPanel2:TrainGroup"]');
+
+            function handleRadioChecked(radioGroup) {
+                Array.prototype.slice.call(radioGroup).forEach(function (radio) {
+
+                    radio.addEventListener('click', function () {
+
+                    Array.prototype.slice.call(radioGroup).forEach(function (radio) {
+                        radio.parentNode.parentNode.classList.remove('active');
+                    })
+
+                    radio.parentNode.parentNode.classList.add('active');
+
+                    })
+
+                });
+            }
+
+            handleRadioChecked(outboundRadios);
+            handleRadioChecked(returnRadios);
+
+        });
+    </script>
+</div>
+                            
+                        </section>
+
+                        <!-- Summary -->
+                        <section class="ticket-summary">
+                            <div class="uk-card uk-card-default uk-card-body form-card">
+                                <p style="color:#db364f"></p>
+                                <span>
+        <div class="uk-flex uk-flex-between uk-flex-middle form-title-wrapper">
+            <h2 class="form-title">訂位明細</h2>
+            <a rel="noopener" href="/IMINT/?wicket:interface=:1:BookingS2Form:TicketTrainInfoPanel:BackButton::ILinkListener" class="btn-reselectTrain">
+                <span class="material-icons">search</span>重新查詢
+            </a>
+        </div>
+
+        <div class="uk-child-width-1-1 uk-child-width-1-2@m uk-grid-small" uk-grid>
+            <!-- Ticket: Outbound -->
+            <div>
+                <div class="uk-flex uk-flex-column outbound">
+                    <!-- Ticket Card -->
+                    <div class="ticket-card">
+                        <div class="uk-flex uk-flex-between card-top">
+                            <div>
+                                <span class="direction"><span>去程</span></span>
+                                <span class="date"><span id="InfoDepartureDate0">07/19</span></span>
+                            </div>
+                            <p class="train-no">
+                            <span class="material-icons-outlined">directions_railway</span><span id="InfoCode0">802</span>
+                            </p>
+                        </div>
+                        <div class="trip-info uk-flex uk-flex-middle">
+                            <!-- Info Left -->
+                            <div class="departure uk-flex-none">
+                                <p class="departure-time"><span id="InfoDeparture0">06:29</span></p>
+                                <p class="departure-stn"><span>台南</span></p>
+                            </div>
+                            <!-- Info Center -->
+                            <div class="meta uk-flex-1">
+                                <hr>
+                                <p class="duration">
+                                    <span class="material-icons">schedule</span><span id="InfoEstimatedTime0">0:17</span>
+                                </p>
+                            </div>
+                            <!-- Info Right -->
+                            <div class="arrival uk-flex-none">
+                                <p class="arrival-time"><span id="InfoArrival0">06:46</span></p>
+                                <p class="arrival-stn"><span>嘉義</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="uk-width-expand uk-flex uk-flex-column uk-flex-right">
+                <div class="extra-info uk-flex uk-flex-column">
+                    <div class="uk-flex uk-flex-between">
+                        <span class="info-title">車廂</span>
+                        <span class="info-data">標準車廂</span>
+                    </div>
+                    <div class="uk-flex uk-flex-between">
+                        <span class="info-title">票數</span>
+                        <span class="info-data uk-text-right"><span><span>全票 1</span> 張</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </span>
+
+                                <!-- Form Ctrl Group -->
+                                <div class="uk-flex uk-flex-right form-ctrl-group">
+                                    <input hidefocus="" name="SubmitButton" style="border: 0px;line-height: 40px;" type="submit" class="uk-button uk-button-primary uk-button-large btn-next" value="確認車次"/>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Notice -->
+                        
+    <section class="notice notice-card">
+        <ul uk-accordion>
+            <li class="uk-open">
+                <a class="uk-accordion-title" href="#">注意事項</a>
+                <div class="uk-accordion-content">
+                    <ol>
+                        <li><span class="highlight">本網頁顯示內容為目前於訂位系統搜尋到的可訂車次及票價，實際訂位結果仍以「完成訂位」頁面之內容為主。</span></li>
+                        <li>列車時刻及優惠資訊若有更動，以各車站現場公告為準。</li>
+                        <li>「早鳥優惠」、「大學生優惠」及「少年優惠」表示該車次標準車廂對號座享有全票、大學生票、少年票之票價折扣優惠，詳細內容請洽台灣高鐵企業網站。</li>
+                    </ol>
+                    
+                    
+                </div>
+            </li>
+        </ul>
+    </section>
+
+                    </form>
+                </main>
+            </div>
+        
+
+            <!----- footer starts ----->
+            <footer>
+                <div id="footer" class="footer-links" >
+                    <p>
+                        <a rel="noopener" href="https://www.thsrc.com.tw/ArticleContent/F00BD7D4-7C62-44EC-9758-053934AE06E0" target="_blank" onclick="gtag('event', 'Footer_Click', {'event_category': 'IRS_Footer','event_label': 'Footer_常見問題'});">常見問題</a> |
+                        <a rel="noopener" href="https://www.thsrc.com.tw/ArticleContent/291d80fe-080f-4442-90d0-9a9b82f119e5" target="_blank" onclick="gtag('event', 'Footer_Click', {'event_category': 'IRS_Footer','event_label': 'Footer_交易注意事項'});">交易注意事項</a> |
+                        <a rel="noopener" href="https://www.thsrc.com.tw/ArticleContent/d1fa3bcb-a016-47e2-88c6-7b7cbed00ed5" target="_blank" onclick="gtag('event', 'Footer_Click', {'event_category': 'IRS_Footer','event_label': 'Footer_個人資料保護專區'});">個人資料保護專區</a> |
+                        <a rel="noopener" href="https://www.thsrc.com.tw/ArticleContent/dea241a9-fe69-4e9d-b9a5-6caed6e486d6" target="_blank" onclick="gtag('event', 'Footer_Click', {'event_category': 'IRS_Footer','event_label': 'Footer_網路訂票說明'});">網路訂票說明</a> |
+                        <a rel="noopener" href="https://www.thsrc.com.tw" target="_blank" onclick="gtag('event', 'Footer_Click', {'event_category': 'IRS_Footer','event_label': 'Footer_企業網站'});">企業網站</a> |
+                        <a rel="noopener" href="https://www.thsrc.com.tw/ArticleContent/AFAC38BD-AC68-419A-9B7F-E5C0EBCE3CE8" target="_blank" onclick="gtag('event', 'Footer_Click', {'event_category': 'IRS_Footer','event_label': 'Footer_聯絡我們'});">聯絡我們</a>
+                    </p>
+                </div>
+                <div class="copyright">
+                    <p>&copy; 台灣高速鐵路股份有限公司 Taiwan High Speed Rail Corporation.</p>
+                </div>
+            </footer>
+            <!----- footer ends ----->
+        
+    <script type="text/javascript"  src="/WSBFF0Ikb7Br/YbMGviKq2i/ri/YbNEVXQXcGJLf6OuiD/PFY6AQ/XU/EbTnAOZhIB"></script><noscript><img src="https://irs.thsrc.com.tw/akam/13/pixel_6489a76f?a=dD02NDU0MDkzNDM0MjBlNWZmNzhlNDNhMmU1N2MyOGNmNGFjYjI1MWQ0JmpzPW9mZg==" style="visibility: hidden; position: absolute; left: -999px; top: -999px;" /></noscript></body>
+</html>

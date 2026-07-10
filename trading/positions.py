@@ -60,6 +60,14 @@ class PositionManager:
                     added_at TEXT    NOT NULL
                 )
             """)
+            con.execute("""
+                CREATE TABLE IF NOT EXISTS intraday_watch (
+                    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                    code     TEXT    NOT NULL UNIQUE,
+                    name     TEXT    NOT NULL DEFAULT '',
+                    added_at TEXT    NOT NULL
+                )
+            """)
 
     # ── 輔助 ───────────────────────────────────────────────────
 
@@ -189,5 +197,33 @@ class PositionManager:
         with self._conn() as con:
             rows = con.execute(
                 "SELECT id, code, name, added_at FROM watchlist ORDER BY added_at DESC"
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    # ── 即時監控清單（獨立於觀察名單，供「即時監控」頁簽使用） ──────
+
+    def intraday_watch_add(self, code: str, name: str = "") -> bool:
+        """新增即時監控股票。重複 code 回傳 False。"""
+        try:
+            with self._conn() as con:
+                con.execute(
+                    "INSERT INTO intraday_watch (code, name, added_at) VALUES (?, ?, ?)",
+                    (code, name, datetime.date.today().isoformat()),
+                )
+            return True
+        except sqlite3.IntegrityError:
+            return False
+
+    def intraday_watch_remove(self, code: str) -> bool:
+        """移除即時監控股票。不存在回傳 False。"""
+        with self._conn() as con:
+            cur = con.execute("DELETE FROM intraday_watch WHERE code = ?", (code,))
+            return cur.rowcount > 0
+
+    def intraday_watch_list(self) -> list:
+        """回傳所有即時監控股票 [{id, code, name, added_at}]。"""
+        with self._conn() as con:
+            rows = con.execute(
+                "SELECT id, code, name, added_at FROM intraday_watch ORDER BY added_at ASC"
             ).fetchall()
         return [dict(r) for r in rows]

@@ -1,0 +1,15 @@
+{
+  "interval": 5,
+  "weights": {
+    "trend": 8,
+    "ict": 0,
+    "fundamental": 8,
+    "rsi": 3,
+    "macd": 14,
+    "bollinger": 0,
+    "breakout": 8,
+    "vix_panic": 0,
+    "chip_washout": 11,
+    "ensemble": 14
+  }
+}

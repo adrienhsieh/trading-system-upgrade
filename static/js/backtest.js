@@ -98,8 +98,9 @@ function runFullBacktest(){
 
   const btFilterParam = btTechFilterEnabled ? '&filter=tech' : '';
   const _btKey = localStorage.getItem('trading_api_key') || '';
+  const _btToken = localStorage.getItem('jwt_token') || '';
   if(typeof NProgress!=='undefined') NProgress.start();
-  fullBtEs = new EventSource(`/api/backtest/full?strategy=${strat}&period=${period}&min_score=${score}${btFilterParam}&key=${encodeURIComponent(_btKey)}`);
+  fullBtEs = new EventSource(`/api/backtest/full?strategy=${strat}&period=${period}&min_score=${score}${btFilterParam}&key=${encodeURIComponent(_btKey)}&token=${encodeURIComponent(_btToken)}`);
   fullBtEs.onmessage = ev => {
     const d = JSON.parse(ev.data);
     if(d.type === 'scan_progress'){
@@ -556,6 +557,7 @@ function runOptimizer(){
     commission_pct, slippage_pct,
     param_grid: JSON.stringify(param_grid),
     key: localStorage.getItem('trading_api_key') || '',
+    token: localStorage.getItem('jwt_token') || '',
   });
   _optEs = new EventSource('/api/backtest/optimize?' + qs.toString());
 

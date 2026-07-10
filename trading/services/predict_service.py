@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 台股多因子加權預測核心服務引擎
 專案路徑: D:\SourceCode\TypeScript\trading-system-main\trading\services\predict_service.py
 """

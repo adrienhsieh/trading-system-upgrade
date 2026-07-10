@@ -9,6 +9,7 @@ import threading
 import time
 import webbrowser
 from pathlib import Path
+from trading.api.api_system import api_system  
 
 BASE_DIR = Path(__file__).parent
 
@@ -122,6 +123,20 @@ def main() -> None:
     ohlcv_daemon = _svc.ohlcv_daemon
     ohlcv_daemon.start()
     print(f"   OHLCV更新:  ✅ 已啟動（每日 14:00 全市場增量更新）")
+
+    # ── 即時監控 Daemon（獨立背景作業，09:00-13:30 盤中自動抓取） ──
+    from trading.api.intraday import apply_saved_settings, _refresh_daemon_codes
+    intraday_monitor = _svc.intraday_monitor
+    apply_saved_settings()   # 還原上次儲存的 FETCH_INTERVAL / 策略權重
+    _refresh_daemon_codes()  # 彙整所有使用者目前的監控清單
+    intraday_monitor.start()
+    print(f"   即時監控:  ✅ 已啟動（盤中 09:00-13:30，每 {intraday_monitor.get_interval()} 秒自動抓取，可於頁面即時調整）")
+
+    # ── 基本面／籌碼資料（TWSE OpenAPI：本益比/殖利率/月營收/融資融券） ──
+    import threading as _threading
+    fundamentals_svc = _svc.fundamentals
+    _threading.Thread(target=fundamentals_svc.refresh_all, daemon=True, name="FundamentalsRefresh").start()
+    print(f"   基本面資料: ✅ 背景更新中（本益比/殖利率/月營收/融資融券，每日快取一次）")
 
     # ── 背景任務 ───────────────────────────────────────────────
 

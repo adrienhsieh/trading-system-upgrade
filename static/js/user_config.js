@@ -1,6 +1,5 @@
 // static/js/user_config.js
 
-#const USER_CONFIG_BASE_URL = 'http://localhost:8787/api/user_config';
 const USER_CONFIG_BASE_URL = '/api/user_config';
 
 /**

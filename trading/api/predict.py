@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 台股多因子加權預測 API 路由中樞 (終極資料庫對齊版本)
 專案路徑: D:\SourceCode\TypeScript\trading-system-main\trading\api\predict.py
 """

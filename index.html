@@ -42,8 +42,10 @@
       </div>
     </div>
     <div class="nav-right">
+      <span id="nav-username" class="nav-username" style="font-size:12px;color:var(--tblr-secondary-color,#8b949e);margin-right:8px;font-family:'JetBrains Mono',monospace;"></span>
       <span id="clock" class="nav-clock">--:--:--</span>
       <button class="btn-icon" onclick="openSettings()" title="設定">⚙️</button>
+      <button class="btn-icon" onclick="handleLogout()" title="登出">🚪</button>
     </div>
   </div>
 </header>
@@ -53,9 +55,24 @@
   <div class="tab active" data-tab="holdings">持股戰情</div>
   <div class="tab" data-tab="watchlist">觀察名單</div>
   <div class="tab" data-tab="scanner">台股掃描</div>
-  <!-- 🔴 1. 新增：台股預測導覽標籤（完美還原 NEW 紅色小標籤） -->
   <div class="tab" data-tab="predict" style="position: relative; padding-right: 22px !important;">
     台股預測
+    <span style="position: absolute; top: 4px; right: 2px; background: #d63939; color: white; font-size: 9px; padding: 1px 3.5px; border-radius: 4px; font-weight: bold; transform: scale(0.75); line-height: 1;">NEW</span>
+  </div>
+  <div class="tab" data-tab="intraday" style="position: relative; padding-right: 22px !important;">
+    即時監控
+    <span style="position: absolute; top: 4px; right: 2px; background: #d63939; color: white; font-size: 9px; padding: 1px 3.5px; border-radius: 4px; font-weight: bold; transform: scale(0.75); line-height: 1;">NEW</span>
+  </div>
+  <div class="tab" data-tab="thsr" style="position: relative; padding-right: 22px !important;">
+    高鐵訂票
+    <span style="position: absolute; top: 4px; right: 2px; background: #d63939; color: white; font-size: 9px; padding: 1px 3.5px; border-radius: 4px; font-weight: bold; transform: scale(0.75); line-height: 1;">NEW</span>
+  </div>
+  <div class="tab" data-tab="thsr-sniper" style="position: relative; padding-right: 22px !important;">
+    高鐵自動搶票
+    <span style="position: absolute; top: 4px; right: 2px; background: #d63939; color: white; font-size: 9px; padding: 1px 3.5px; border-radius: 4px; font-weight: bold; transform: scale(0.75); line-height: 1;">NEW</span>
+  </div>
+  <div class="tab" data-tab="thsr-history" style="position: relative; padding-right: 22px !important;">
+    高鐵訂位查詢/取消
     <span style="position: absolute; top: 4px; right: 2px; background: #d63939; color: white; font-size: 9px; padding: 1px 3.5px; border-radius: 4px; font-weight: bold; transform: scale(0.75); line-height: 1;">NEW</span>
   </div>
   <div class="tab" data-tab="backtest">回測</div>
@@ -108,313 +125,805 @@
     </div>
   </div>
 
-              <!-- 觀察名單 -->
-              <div class="panel" id="tab-watchlist">
-                <div class="sec-hdr">
-                  <div class="sec-title-mono">觀察名單 <em id="wl-count">0</em> 檔</div>
-                  <div style="display:flex;gap:6px">
-                    <button class="btn-xs" id="wl-refresh-btn" onclick="loadWatchlistAnalysis()" title="重新分析">↻ 分析</button>
-                    <button class="btn btn-sm btn-success" onclick="openWlAddModal()">+ 新增</button>
-                  </div>
-                </div>
-                <div id="wl-list">
-                  <div class="empty"><div class="empty-icon">👀</div>尚無觀察股票，點擊「+ 新增」開始追蹤</div>
-                </div>
-              </div>
+  <!-- 觀察名單 -->
+  <div class="panel" id="tab-watchlist" style="display:none;">
+    <div class="sec-hdr">
+      <div class="sec-title-mono">觀察名單 <em id="wl-count">0</em> 檔</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-xs" id="wl-refresh-btn" onclick="loadWatchlistAnalysis()" title="重新分析">↻ 分析</button>
+        <button class="btn btn-sm btn-success" onclick="openWlAddModal()">+ 新增</button>
+      </div>
+    </div>
+    <div id="wl-list">
+      <div class="empty"><div class="empty-icon">👀</div>尚無觀察股票，點擊「+ 新增」開始追蹤</div>
+    </div>
+  </div>
 
-              <!-- 台股掃描 -->
-              <div class="panel" id="tab-scanner">
-                <div class="sec-hdr">
-                  <div class="strat-row">
-                    <button class="sbtn active" id="strend" onclick="setStrat('trend')">🛡️ 趨勢策略</button>
-                    <button class="sbtn" id="sict" onclick="setStrat('ict')">🏹 ICT 策略</button>
-                    <button class="sbtn" id="sfundamental" onclick="setStrat('fundamental')">📊 基本面</button>
-                  </div>
-                  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-                    <button class="btn btn-sm btn-primary" id="scan-btn" onclick="runScan()">▶ 自訂清單</button>
-                    <button class="btn btn-sm btn-danger d-none" id="scan-stop-btn" onclick="stopScan()">■ 停止</button>
-                    <button class="btn btn-sm btn-success" id="full-scan-btn" onclick="runFullScan()">🌐 全台股</button>
-                    <button class="btn btn-sm btn-danger d-none" id="full-scan-stop-btn" onclick="stopFullScan()">■ 停止</button>
-                    <button class="btn btn-sm btn-outline-info" id="tech-filter-btn" onclick="toggleTechFilter()" title="切換篩選範圍">⚡ 電子股</button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="openStratSettings()" title="策略指標設定">⚙ 設定</button>
-                  </div>
-                </div>
-                <div id="full-scan-progress" style="display:none">
-                  <div class="full-scan-bar">
-                    <div class="fsb-top">
-                      <span class="fsb-title" id="fsb-label">準備中...</span>
-                      <span class="fsb-count" id="fsb-count">0 / 0</span>
-                    </div>
-                    <div class="fsb-track"><div class="fsb-fill" id="fsb-fill" style="width:0%"></div></div>
-                  </div>
-                  <div id="scan-live-results" style="margin-bottom:10px;"></div>
-                </div>
-                <div id="scan-result">
-                  <div class="empty">
-                    <div class="empty-icon">🎯</div>
-                    點擊「自訂清單」掃描設定中的候選股（約30-60秒）<br>
-                    或點擊「全台股」掃描全部上市股票（約5-15分鐘）
-                  </div>
-                </div>
-              </div>
+  <!-- 台股掃描 -->
+  <div class="panel" id="tab-scanner" style="display:none;">
+    <div class="sec-hdr">
+      <div class="strat-row" style="flex-wrap:wrap;">
+        <button class="sbtn active" id="strend" onclick="setStrat('trend')">🛡️ 趨勢策略</button>
+        <button class="sbtn" id="sict" onclick="setStrat('ict')">🏹 ICT 策略</button>
+        <button class="sbtn" id="sfundamental" onclick="setStrat('fundamental')">📊 基本面</button>
+        <button class="sbtn" id="srsi" onclick="setStrat('rsi')">📉 RSI</button>
+        <button class="sbtn" id="smacd" onclick="setStrat('macd')">〰️ MACD</button>
+        <button class="sbtn" id="sbollinger" onclick="setStrat('bollinger')">🎢 布林通道</button>
+        <button class="sbtn" id="sbreakout" onclick="setStrat('breakout')">🚀 突破策略</button>
+        <button class="sbtn" id="svixpanic" onclick="setStrat('vix_panic')">😱 VIX恐慌篩選</button>
+        <button class="sbtn" id="schipwashout" onclick="setStrat('chip_washout')">🧼 籌碼洗淨</button>
+        <button class="sbtn" id="sensemble" onclick="setStrat('ensemble')">🗳️ 組合投票</button>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-sm btn-primary" id="scan-btn" onclick="runScan()">▶ 自訂清單</button>
+        <button class="btn btn-sm btn-danger d-none" id="scan-stop-btn" onclick="stopScan()">■ 停止</button>
+        <button class="btn btn-sm btn-success" id="full-scan-btn" onclick="runFullScan()">🌐 全台股</button>
+        <button class="btn btn-sm btn-danger d-none" id="full-scan-stop-btn" onclick="stopFullScan()">■ 停止</button>
+        <button class="btn btn-sm btn-outline-info" id="tech-filter-btn" onclick="toggleTechFilter()" title="切換篩選範圍">⚡ 電子股</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="openStratSettings()" title="策略指標設定">⚙ 設定</button>
+      </div>
+    </div>
+    <div id="full-scan-progress" style="display:none">
+      <div class="full-scan-bar">
+        <div class="fsb-top">
+          <span class="fsb-title" id="fsb-label">準備中...</span>
+          <span class="fsb-count" id="fsb-count">0 / 0</span>
+        </div>
+        <div class="fsb-track"><div class="fsb-fill" id="fsb-fill" style="width:0%"></div></div>
+      </div>
+      <div id="scan-live-results" style="margin-bottom:10px;"></div>
+    </div>
+    <div id="scan-result">
+      <div class="empty">
+        <div class="empty-icon">🎯</div>
+        點擊「自訂清單」掃描設定中的候選股（約30-60秒）<br>
+        或點擊「全台股」掃描全部上市股票（約5-15分鐘）
+      </div>
+    </div>
+  </div>
 
-              <!-- 回測 -->
-              <div class="panel" id="tab-backtest">
+  <!-- 回測 -->
+  <div class="panel" id="tab-backtest" style="display:none;">
+    <!-- 參數列 -->
+    <div class="row g-2 mb-3">
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label">代號 <span style="font-size:9px;color:var(--bs-secondary-color)">(逗號分隔多檔)</span></label>
+        <input class="form-control form-control-sm" id="bt-code" placeholder="2330 或 2330,2454">
+      </div>
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label">策略</label>
+        <select class="form-select form-select-sm" id="bt-strat">
+          <option value="trend">趨勢策略</option>
+          <option value="ict">ICT 策略</option>
+          <option value="fundamental">基本面策略</option>
+          <option value="rsi">RSI 策略</option>
+          <option value="macd">MACD 策略</option>
+          <option value="bollinger">布林通道策略</option>
+          <option value="breakout">突破策略</option>
+          <option value="vix_panic">VIX恐慌篩選</option>
+          <option value="chip_washout">籌碼洗淨策略</option>
+          <option value="ensemble">組合投票策略</option>
+        </select>
+      </div>
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label">回測週期</label>
+        <select class="form-select form-select-sm" id="bt-period">
+          <option value="6mo">6 個月</option>
+          <option value="1y">1 年</option>
+          <option value="2y" selected>2 年</option>
+          <option value="3y">3 年</option>
+          <option value="5y">5 年</option>
+        </select>
+      </div>
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label">最低進場分數</label>
+        <select class="form-select form-select-sm" id="bt-score">
+          <option value="3">≥ 3 分</option>
+          <option value="4" selected>≥ 4 分</option>
+          <option value="5">≥ 5 分</option>
+        </select>
+      </div>
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label">手續費 %</label>
+        <input class="form-control form-control-sm" id="bt-commission" type="number" step="0.0001" min="0" max="0.01" value="0.001425" title="單邊手續費比例（台股預設 0.1425%）">
+      </div>
+      <div class="col-6 col-sm-3 col-lg-2">
+        <label class="form-label">滑價 %</label>
+        <input class="form-control form-control-sm" id="bt-slippage" type="number" step="0.0001" min="0" max="0.01" value="0.0005" title="單邊滑價比例（預設 0.05%）">
+      </div>
+      <div class="col-12 col-lg-4" style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-primary flex-fill" id="bt-run-btn" onclick="runBacktest()">▶ 開始回測</button>
+        <button class="btn btn-sm btn-danger d-none" id="bt-stop-btn" onclick="stopBacktest()">■ 停止</button>
+        <button class="btn btn-sm btn-outline-warning flex-fill" id="bt-full-btn" onclick="runFullBacktest()" title="掃描全市場高分股後批次回測">🌐 全市場</button>
+        <button class="btn btn-sm btn-outline-info" id="bt-tech-filter-btn" onclick="toggleBtTechFilter()" title="僅掃電子/科技/通訊類股">⚡ 電子股</button>
+        <button class="btn btn-sm btn-danger d-none" id="bt-full-stop-btn" onclick="stopFullBacktest()">■ 停止</button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="runOptimizer()" title="參數掃描（grid search）">⚙ 參數掃描</button>
+      </div>
+    </div>
 
-                <!-- 參數列 -->
-                <div class="row g-2 mb-3">
-                  <div class="col-6 col-sm-3 col-lg-2">
-                    <label class="form-label">代號 <span style="font-size:9px;color:var(--bs-secondary-color)">(逗號分隔多檔)</span></label>
-                    <input class="form-control form-control-sm" id="bt-code" placeholder="2330 或 2330,2454">
-                  </div>
-                  <div class="col-6 col-sm-3 col-lg-2">
-                    <label class="form-label">策略</label>
-                    <select class="form-select form-select-sm" id="bt-strat">
-                      <option value="trend">趨勢策略</option>
-                      <option value="ict">ICT 策略</option>
-                      <option value="fundamental">基本面策略</option>
-                    </select>
-                  </div>
-                  <div class="col-6 col-sm-3 col-lg-2">
-                    <label class="form-label">回測週期</label>
-                    <select class="form-select form-select-sm" id="bt-period">
-                      <option value="6mo">6 個月</option>
-                      <option value="1y">1 年</option>
-                      <option value="2y" selected>2 年</option>
-                      <option value="3y">3 年</option>
-                      <option value="5y">5 年</option>
-                    </select>
-                  </div>
-                  <div class="col-6 col-sm-3 col-lg-2">
-                    <label class="form-label">最低進場分數</label>
-                    <select class="form-select form-select-sm" id="bt-score">
-                      <option value="3">≥ 3 分</option>
-                      <option value="4" selected>≥ 4 分</option>
-                      <option value="5">≥ 5 分</option>
-                    </select>
-                  </div>
-                  <div class="col-6 col-sm-3 col-lg-2">
-                    <label class="form-label">手續費 %</label>
-                    <input class="form-control form-control-sm" id="bt-commission" type="number" step="0.0001" min="0" max="0.01" value="0.001425" title="單邊手續費比例（台股預設 0.1425%）">
-                  </div>
-                  <div class="col-6 col-sm-3 col-lg-2">
-                    <label class="form-label">滑價 %</label>
-                    <input class="form-control form-control-sm" id="bt-slippage" type="number" step="0.0001" min="0" max="0.01" value="0.0005" title="單邊滑價比例（預設 0.05%）">
-                  </div>
-                  <div class="col-12 col-lg-4" style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap">
-                    <button class="btn btn-sm btn-primary flex-fill" id="bt-run-btn" onclick="runBacktest()">▶ 開始回測</button>
-                    <button class="btn btn-sm btn-danger d-none" id="bt-stop-btn" onclick="stopBacktest()">■ 停止</button>
-                    <button class="btn btn-sm btn-outline-warning flex-fill" id="bt-full-btn" onclick="runFullBacktest()" title="掃描全市場高分股後批次回測">🌐 全市場</button>
-                    <button class="btn btn-sm btn-outline-info" id="bt-tech-filter-btn" onclick="toggleBtTechFilter()" title="僅掃電子/科技/通訊類股">⚡ 電子股</button>
-                    <button class="btn btn-sm btn-danger d-none" id="bt-full-stop-btn" onclick="stopFullBacktest()">■ 停止</button>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="runOptimizer()" title="參數掃描（grid search）">⚙ 參數掃描</button>
-                  </div>
-                </div>
+    <!-- 空狀態 / 載入中 -->
+    <div id="bt-empty" class="empty">
+      <div class="empty-icon">🔬</div>
+      輸入代號、選擇策略，開始回測
+    </div>
 
-                <!-- 空狀態 / 載入中 -->
-                <div id="bt-empty" class="empty">
-                  <div class="empty-icon">🔬</div>
-                  輸入代號、選擇策略，開始回測
-                </div>
+    <!-- 結果區 -->
+    <div id="bt-result" style="display:none">
+      <!-- 績效指標卡 -->
+      <div class="row g-2 mb-3" id="bt-stats"></div>
 
-                <!-- 結果區 -->
-                <div id="bt-result" style="display:none">
+      <!-- 資產曲線 -->
+      <div class="card mb-3" id="bt-equity-card">
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+          <h3 class="card-title" style="font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin:0">資產曲線</h3>
+          <button class="btn btn-xs btn-outline-secondary" onclick="exportEquityPng()" title="匯出 PNG">📷</button>
+        </div>
+        <div class="card-body py-2">
+          <div id="bt-equity-box" style="position:relative;height:220px">
+            <canvas id="bt-equity-chart"></canvas>
+          </div>
+        </div>
+      </div>
 
-                  <!-- 績效指標卡 -->
-                  <div class="row g-2 mb-3" id="bt-stats"></div>
+      <!-- 單檔交易記錄 -->
+      <div id="bt-single-trades" class="card">
+        <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+          <h3 class="card-title" style="font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin:0">交易記錄</h3>
+          <button class="btn btn-xs btn-outline-secondary" onclick="exportTradesCsv()" title="匯出 CSV">⬇ CSV</button>
+        </div>
+        <div class="card-body p-0">
+          <div style="overflow-x:auto;max-height:320px;overflow-y:auto">
+            <table class="table table-sm table-hover mb-0" style="font-family:var(--mono);font-size:11px">
+              <thead style="position:sticky;top:0;background:var(--bs-card-bg)">
+                <tr>
+                  <th>進場日</th><th>出場日</th>
+                  <th style="text-align:right">進場價</th><th style="text-align:right">出場價</th>
+                  <th style="text-align:right">股數</th>
+                  <th style="text-align:right">損益</th><th style="text-align:right">損益%</th>
+                  <th>原因</th>
+                </tr>
+              </thead>
+              <tbody id="bt-trade-list"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
-                  <!-- 資產曲線 -->
-                  <div class="card mb-3" id="bt-equity-card">
-                    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
-                      <h3 class="card-title" style="font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin:0">資產曲線</h3>
-                      <button class="btn btn-xs btn-outline-secondary" onclick="exportEquityPng()" title="匯出 PNG">📷</button>
-                    </div>
-                    <div class="card-body py-2">
-                      <div id="bt-equity-box" style="position:relative;height:220px">
-                        <canvas id="bt-equity-chart"></canvas>
-                      </div>
-                    </div>
-                  </div>
+      <!-- 多檔個別明細（可展開） -->
+      <div id="bt-detail-section" style="display:none"></div>
+    </div><!-- /bt-result -->
+  </div><!-- /tab-backtest -->
 
-                  <!-- 單檔交易記錄 -->
-                  <div id="bt-single-trades" class="card">
-                    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
-                      <h3 class="card-title" style="font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin:0">交易記錄</h3>
-                      <button class="btn btn-xs btn-outline-secondary" onclick="exportTradesCsv()" title="匯出 CSV">⬇ CSV</button>
-                    </div>
-                    <div class="card-body p-0">
-                      <div style="overflow-x:auto;max-height:320px;overflow-y:auto">
-                        <table class="table table-sm table-hover mb-0" style="font-family:var(--mono);font-size:11px">
-                          <thead style="position:sticky;top:0;background:var(--bs-card-bg)">
-                            <tr>
-                              <th>進場日</th><th>出場日</th>
-                              <th style="text-align:right">進場價</th><th style="text-align:right">出場價</th>
-                              <th style="text-align:right">股數</th>
-                              <th style="text-align:right">損益</th><th style="text-align:right">損益%</th>
-                              <th>原因</th>
-                            </tr>
-                          </thead>
-                          <tbody id="bt-trade-list"></tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </div>
+  <!-- 財經情報 -->
+  <div class="panel" id="tab-news" style="display:none;">
+    <div class="sec-hdr">
+      <div class="sec-title-mono">財經情報 <span style="font-size:9px;font-weight:400">RSS 即時</span></div>
+      <button class="btn-xs" onclick="loadNews()">↻ 更新</button>
+    </div>
+    <div id="news-list">
+      <div class="loader"><div class="spinner"></div>載入中...</div>
+    </div>
+  </div>
 
-                  <!-- 多檔個別明細（可展開） -->
-                  <div id="bt-detail-section" style="display:none"></div>
+  <!-- AI 情報 -->
+  <div class="panel" id="tab-ai" style="display:none;">
+    <!-- AI 市場情緒（Groq） -->
+    <div class="sec-hdr">
+      <div class="sec-title-mono">🤖 AI 市場情緒 <span style="font-size:9px;font-weight:400">Groq 分析</span></div>
+      <button class="btn-xs" id="ai-sentiment-btn" onclick="loadAiSentiment()">⚡ 分析</button>
+    </div>
+    <div id="ai-sentiment-box">
+      <div class="empty" style="font-size:11px">點擊「分析」使用 Groq AI 評估整體市場情緒</div>
+    </div>
 
-                </div><!-- /bt-result -->
-              </div><!-- /tab-backtest -->
+    <!-- X/Twitter 情報 -->
+    <div class="sec-hdr" style="margin-top:18px">
+      <div class="sec-title-mono">🐦 X 市場討論 <span style="font-size:9px;font-weight:400">過去 24 小時</span></div>
+      <button class="btn-xs" id="x-intel-btn" onclick="loadXIntel(true)">↻ 更新</button>
+    </div>
+    <div id="x-intel-box">
+      <div class="empty" style="font-size:11px">載入 X/Twitter 市場討論情緒</div>
+    </div>
 
-              <!-- 財經情報 -->
-              <!-- 財經情報 -->
-              <div class="panel" id="tab-news">
-                <div class="sec-hdr">
-                  <div class="sec-title-mono">財經情報 <span style="font-size:9px;font-weight:400">RSS 即時</span></div>
-                  <button class="btn-xs" onclick="loadNews()">↻ 更新</button>
-                </div>
-                <div id="news-list">
-                  <div class="loader"><div class="spinner"></div>載入中...</div>
-                </div>
+    <!-- 每日情報摘要 -->
+    <div class="sec-hdr" style="margin-top:18px">
+      <div class="sec-title-mono">📋 每日情報摘要 <span style="font-size:9px;font-weight:400">AI 生成（每日 08:00）</span></div>
+      <div style="display:flex;gap:4px">
+        <button class="btn-xs" id="regen-summary-btn" onclick="generateSummary()">⚡ 重新生成</button>
+        <button class="btn-xs" id="daily-summary-btn" onclick="loadDailySummary()">↻ 載入</button>
+      </div>
+    </div>
+    <div id="daily-summary-box">
+      <div class="empty" style="font-size:11px">每日 08:00 由 Daemon 自動生成，或點擊載入最新摘要</div>
+    </div>
+  </div>
 
-              </div>
+  <!-- 主題搜尋 -->
+  <div class="panel" id="tab-topic" style="display:none;">
+    <div style="background:var(--bs-card-bg);border:1px solid var(--bs-card-border-color);border-radius:6px;padding:10px 12px;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+        <input class="form-control form-control-sm" id="scan-topic-q" placeholder="輸入主題關鍵字（如 CoWoS、液冷散熱）" style="max-width:320px" onkeydown="if(event.key==='Enter')searchTopic()">
+        <button class="btn btn-sm btn-outline-primary" onclick="searchTopic()">搜尋</button>
+        <span style="font-size:10px;color:var(--bs-tertiary-color);margin-left:4px">或點擊下方標籤</span>
+      </div>
+      <div id="scan-kw-cloud" style="display:flex;flex-wrap:wrap;gap:5px;max-height:120px;overflow-y:auto;">
+        <span style="font-size:11px;color:var(--bs-tertiary-color)">載入關鍵字中...</span>
+      </div>
+    </div>
+    <div id="scan-topic-result" style="margin-bottom:10px;"></div>
+  </div><!-- /tab-topic -->
 
-              <!-- AI 情報 -->
-              <div class="panel" id="tab-ai">
-                <!-- AI 市場情緒（Groq） -->
-                <div class="sec-hdr">
-                  <div class="sec-title-mono">🤖 AI 市場情緒 <span style="font-size:9px;font-weight:400">Groq 分析</span></div>
-                  <button class="btn-xs" id="ai-sentiment-btn" onclick="loadAiSentiment()">⚡ 分析</button>
-                </div>
-                <div id="ai-sentiment-box">
-                  <div class="empty" style="font-size:11px">點擊「分析」使用 Groq AI 評估整體市場情緒</div>
-                </div>
+  <!-- 台股預測主面板 -->
+  <div class="panel" id="tab-predict" style="display:none; max-height: 86vh; overflow-y: auto !important; padding-bottom: 40px;">
+    <div class="sec-hdr" style="margin-bottom:14px">
+      <div class="sec-title-mono">🔮 台股預測系統 <span style="font-size:9px;font-weight:400">10大/15大 訊號加權</span></div>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <input class="form-control form-control-sm" id="predict-stock-q" placeholder="個股代號 (如 2317)" style="max-width:140px;height:24px;font-family:var(--mono);font-size:11px" onkeydown="if(event.key==='Enter')runStockPrediction()">
+        <button class="btn-xs" onclick="runStockPrediction(); if(typeof loadPredictionHistoryTable==='function') loadPredictionHistoryTable();">⚡ 執行預測</button>
+      </div>
+    </div>
 
-                <!-- X/Twitter 情報 -->
-                <div class="sec-hdr" style="margin-top:18px">
-                  <div class="sec-title-mono">🐦 X 市場討論 <span style="font-size:9px;font-weight:400">過去 24 小時</span></div>
-                  <button class="btn-xs" id="x-intel-btn" onclick="loadXIntel(true)">↻ 更新</button>
-                </div>
-                <div id="x-intel-box">
-                  <div class="empty" style="font-size:11px">載入 X/Twitter 市場討論情緒</div>
-                </div>
+    <div class="row g-3 justify-content-center">
+      <!-- 左卡片：預測指標計分大腦 -->
+      <div class="col-md-6">
+        <div class="card" style="border:1px solid var(--bs-card-border-color); background: var(--bs-card-bg);">
+          <div class="card-body text-center py-4">
+            <div style="width:115px; height:115px; border:5px solid #d63939; border-radius:50%; margin:0 auto; display:flex; flex-direction:column; justify-content:center; align-items:center; background:var(--bs-body-bg); box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);">
+              <span id="lbl-predict-confidence" style="font-family:var(--mono); font-size:26px; font-weight:700; color:var(--bs-body-color);">34.9%</span>
+              <span style="font-size:10px; color:var(--bs-secondary-color); font-weight:500; margin-top:-2px;">信心值</span>
+            </div>
+            <h4 class="mt-3 mb-2" style="font-size:12px; font-weight:600; color:var(--bs-secondary-color);">未來 1 週 預測趨勢</h4>
+            <div class="d-flex justify-content-around my-2" style="font-size:16px; font-weight:700;">
+              <span style="color:#d63939;">▲ 看漲 <span id="lbl-predict-bull">56</span>%</span>
+              <span style="color:#2fb344;">▼ 看跌 <span id="lbl-predict-bear">44</span>%</span>
+            </div>
+            <div class="p-2 rounded-2 my-3 text-center" style="font-size:14px; font-weight:700; color:var(--bs-body-color); background:var(--bs-tertiary-bg); border:1px solid var(--bs-card-border-color); font-family:var(--mono);">
+              <span id="lbl-predict-stock-name">2317 鴻海</span> │ 預估隔日開盤: <span id="lbl-predict-open" style="color:#d63939;">NT$ 272.00</span>
+            </div>
+            <p class="text-muted mb-3" style="font-size:10px; line-height:1.4;">💡 AI 未參與評分，僅依據 10大/15大 技術與三大法人籌碼訊號加權計算未來 1 週漲跌預測</p>
+            <button class="btn btn-sm btn-dark w-100" style="font-size:12px; font-weight:600; background:#1b1b3a; border:none;" onclick="savePredictionToDb()">◎ 建立預測紀錄</button>
+          </div>
+        </div>
+      </div>
 
-                <!-- 每日情報摘要 -->
-                <div class="sec-hdr" style="margin-top:18px">
-                  <div class="sec-title-mono">📋 每日情報摘要 <span style="font-size:9px;font-weight:400">AI 生成（每日 08:00）</span></div>
-                  <div style="display:flex;gap:4px">
-                    <button class="btn-xs" id="regen-summary-btn" onclick="generateSummary()">⚡ 重新生成</button>
-                    <button class="btn-xs" id="daily-summary-btn" onclick="loadDailySummary()">↻ 載入</button>
-                  </div>
-                </div>
-                <div id="daily-summary-box">
-                  <div class="empty" style="font-size:11px">每日 08:00 由 Daemon 自動生成，或點擊載入最新摘要</div>
-                </div>
-              </div>
+      <!-- 右卡片：今日交易資訊快照 -->
+      <div class="col-md-6">
+        <div class="card" style="border:1px solid var(--bs-card-border-color); background: var(--bs-card-bg);">
+          <div class="card-header py-2" style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 class="card-title" style="font-size:12px; font-weight:700; margin:0">今日交易資訊</h3>
+            <span id="lbl-trading-time" class="text-muted" style="font-size:10px;">資料時間：2026/06/12 14:30</span>
+          </div>
+          <div class="card-body py-3">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; column-gap:24px; row-gap:12px; font-family:var(--mono); font-size:11px;">
+              <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">成交</span><span id="lbl-trade-close" style="font-weight:700; color:#d63939;">272.00</span></div>
+              <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">昨收</span><span id="lbl-trade-yesterday" style="font-weight:700;">269.00</span></div>
+              <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">開盤</span><span id="lbl-trade-open" style="font-weight:700;">266.00</span></div>
+              <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">漲跌幅</span><span id="lbl-trade-pct" style="font-weight:700; color:#d63939;">+1.12%</span></div>
+              <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">最高</span><span id="lbl-trade-high" style="font-weight:700; color:#d63939;">272.00</span></div>
+              <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">漲跌</span><span id="lbl-trade-change" style="font-weight:700; color:#d63939;">+3.00</span></div>
+              <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">最低</span><span id="lbl-trade-low" style="font-weight:700; color:#2fb344;">264.00</span></div>
+              <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">總量</span><span id="lbl-trade-volume" style="font-weight:700; color:var(--bs-body-color);">41,990,954</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-              <!-- 主題搜尋 -->
-              <div class="panel" id="tab-topic">
-                <div style="background:var(--bs-card-bg);border:1px solid var(--bs-card-border-color);border-radius:6px;padding:10px 12px;margin-bottom:10px;">
-                  <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-                    <input class="form-control form-control-sm" id="scan-topic-q"
-                      placeholder="輸入主題關鍵字（如 CoWoS、液冷散熱）" style="max-width:320px"
-                      onkeydown="if(event.key==='Enter')searchTopic()">
-                    <button class="btn btn-sm btn-outline-primary" onclick="searchTopic()">搜尋</button>
-                    <span style="font-size:10px;color:var(--bs-tertiary-color);margin-left:4px">或點擊下方標籤</span>
-                  </div>
-                  <div id="scan-kw-cloud" style="display:flex;flex-wrap:wrap;gap:5px;max-height:120px;overflow-y:auto;">
-                    <span style="font-size:11px;color:var(--bs-tertiary-color)">載入關鍵字中...</span>
-                  </div>
-                </div>
-                <div id="scan-topic-result" style="margin-bottom:10px;"></div>
-              </div><!-- /tab-topic -->
+    <!-- 歷史勝率自動對帳單區塊 -->
+    <div class="row g-3 mt-3 justify-content-center">
+      <div class="col-md-12" style="max-width: 82vw;">
+        <div class="card" style="border:1px solid var(--bs-card-border-color); background: var(--bs-card-bg);">
+          <div class="card-header py-2" style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 class="card-title" style="font-size:12px; font-weight:700; margin:0">🔮 歷史預測勝率對帳單</h3>
+            <span style="font-size:11px; font-weight:bold; color:var(--bs-body-color);">
+              模型總勝率：<span id="lbl-total-winrate" style="color:#d63939; font-size:13px;">--%</span>
+              (已結算 <span id="lbl-total-settled-count">0</span> 筆)
+            </span>
+          </div>
+          <div class="card-body p-0">
+            <div style="overflow-x:auto; max-height:220px; overflow-y:auto">
+              <table class="table table-sm table-hover mb-0" style="font-family:var(--mono); font-size:11px; text-align:center;">
+                <thead style="position:sticky; top:0; background:var(--bs-card-bg); z-index:10;">
+                  <tr>
+                    <th>預測日期</th><th>股票</th><th>昨日收盤</th><th>預估開盤</th><th>看漲%</th><th>信心值</th><th>比對狀態</th><th>預測戰果</th>
+                  </tr>
+                </thead>
+                <tbody id="tbl-predict-history-body">
+                  <tr><td colspan="8" class="text-muted py-3">暫無歷史對帳紀錄</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /tab-predict -->
 
-              <!-- 🔴 2. 新增：台股預測主面板（15大核心技術/籌碼因子計分面板與交易快照） -->             
-			  <div class="panel" id="tab-predict" style="max-height: 86vh; overflow-y: auto !important; padding-bottom: 40px;">
-                <div class="sec-hdr" style="margin-bottom:14px">
-                  <div class="sec-title-mono">🔮 台股預測系統 <span style="font-size:9px;font-weight:400">10大/15大 訊號加權</span></div>
-                  <div style="display:flex;gap:6px;align-items:center;">
-                    <input class="form-control form-control-sm" id="predict-stock-q" placeholder="個股代號 (如 2317)" style="max-width:140px;height:24px;font-family:var(--mono);font-size:11px" onkeydown="if(event.key==='Enter')runStockPrediction()">
-					<button class="btn-xs" onclick="runStockPrediction(); if(typeof loadPredictionHistoryTable==='function') loadPredictionHistoryTable();">⚡ 執行預測</button>
-                  </div>
-                </div>
+  <!-- 即時監控 -->
+  <div class="panel" id="tab-intraday" style="display:none;">
 
-                <div class="row g-3 justify-content-center">
-                  <!-- 左卡片：預測指標計分大腦 -->
-                  <div class="col-md-6">
-                    <div class="card" style="border:1px solid var(--bs-card-border-color); background: var(--bs-card-bg);">
-                      <div class="card-body text-center py-4">
-                        <div style="width:115px; height:115px; border:5px solid #d63939; border-radius:50%; margin:0 auto; display:flex; flex-direction:column; justify-content:center; align-items:center; background:var(--bs-body-bg); box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);">
-                          <span id="lbl-predict-confidence" style="font-family:var(--mono); font-size:26px; font-weight:700; color:var(--bs-body-color);">34.9%</span>
-                          <span style="font-size:10px; color:var(--bs-secondary-color); font-weight:500; margin-top:-2px;">信心值</span>
-                        </div>
-                        <h4 class="mt-3 mb-2" style="font-size:12px; font-weight:600; color:var(--bs-secondary-color);">未來 1 週 預測趨勢</h4>
-                        <div class="d-flex justify-content-around my-2" style="font-size:16px; font-weight:700;">
-                          <span style="color:#d63939;">▲ 看漲 <span id="lbl-predict-bull">56</span>%</span>
-                          <span style="color:#2fb344;">▼ 看跌 <span id="lbl-predict-bear">44</span>%</span>
-                        </div>
-                        <div class="p-2 rounded-2 my-3 text-center" style="font-size:14px; font-weight:700; color:var(--bs-body-color); background:var(--bs-tertiary-bg); border:1px solid var(--bs-card-border-color); font-family:var(--mono);">
-                          <span id="lbl-predict-stock-name">2317 鴻海</span> │ 預估隔日開盤: <span id="lbl-predict-open" style="color:#d63939;">NT$ 272.00</span>
-                        </div>
-                        <p class="text-muted mb-3" style="font-size:10px; line-height:1.4;">💡 AI 未參與評分，僅依據 10大/15大 技術與三大法人籌碼訊號加權計算未來 1 週漲跌預測</p>
-                        <button class="btn btn-sm btn-dark w-100" style="font-size:12px; font-weight:600; background:#1b1b3a; border:none;" onclick="savePredictionToDb()">◎ 建立預測紀錄</button>
-                      </div>
-                    </div>
-                  </div>
+    <!-- 系統控制列：FETCH_INTERVAL、盤中狀態、資料來源 -->
+    <div class="sec-hdr" style="flex-wrap:wrap; gap:10px;">
+      <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <span id="id-market-badge" class="badge" style="font-family:var(--mono);font-size:11px;">--</span>
+        <span id="id-channel-badge" class="badge" style="font-family:var(--mono);font-size:11px;">來源: --</span>
+        <span style="font-size:11px;color:var(--text-tertiary,#8b949e);font-family:var(--mono);">FETCH_INTERVAL</span>
+        <input type="number" id="id-interval-input" min="3" value="5" style="width:64px;padding:4px 6px;font-family:var(--mono);font-size:12px;border-radius:4px;border:1px solid var(--border,#30363d);background:var(--bs-body-bg);color:inherit;">
+        <span style="font-size:11px;color:var(--text-tertiary,#8b949e);">秒</span>
+        <button class="btn btn-sm btn-primary" onclick="idApplyInterval()">套用</button>
+        <button class="btn btn-sm" onclick="idForceFetch()" title="不受盤中時間限制，立即抓取一次，方便測試 TWSE→FinMind→YFinance">🔬 立即測試抓取</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-tertiary,#8b949e);font-family:var(--mono);">
+        盤中時間 09:00–13:30 自動抓取；法人／外資為官方每日盤後公告，非逐筆即時
+      </div>
+    </div>
 
-                  <!-- 右卡片：今日交易資訊快照 -->
-                  <div class="col-md-6">
-                    <div class="card" style="border:1px solid var(--bs-card-border-color); background: var(--bs-card-bg);">
-                      <div class="card-header py-2" style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3 class="card-title" style="font-size:12px; font-weight:700; margin:0">今日交易資訊</h3>
-                        <span id="lbl-trading-time" class="text-muted" style="font-size:10px;">資料時間：2026/06/12 14:30</span>
-                      </div>
-                      <div class="card-body py-3">
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; column-gap:24px; row-gap:12px; font-family:var(--mono); font-size:11px;">
-                          <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">成交</span><span id="lbl-trade-close" style="font-weight:700; color:#d63939;">272.00</span></div>
-                          <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">昨收</span><span id="lbl-trade-yesterday" style="font-weight:700;">269.00</span></div>
-                          <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">開盤</span><span id="lbl-trade-open" style="font-weight:700;">266.00</span></div>
-                          <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">漲跌幅</span><span id="lbl-trade-pct" style="font-weight:700; color:#d63939;">+1.12%</span></div>
-                          <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">最高</span><span id="lbl-trade-high" style="font-weight:700; color:#d63939;">272.00</span></div>
-                          <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">漲跌</span><span id="lbl-trade-change" style="font-weight:700; color:#d63939;">+3.00</span></div>
-                          <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">最低</span><span id="lbl-trade-low" style="font-weight:700; color:#2fb344;">264.00</span></div>
-                          <div class="d-flex justify-content-between border-bottom pb-1"><span class="text-muted">總量</span><span id="lbl-trade-volume" style="font-weight:700; color:var(--bs-body-color);">41,990,954</span></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- 🔴 全新安插：歷史勝率自動對帳單區塊 -->
-                <div class="row g-3 mt-3 justify-content-center">
-                  <div class="col-md-12" style="max-width: 82vw;">
-                    <div class="card" style="border:1px solid var(--bs-card-border-color); background: var(--bs-card-bg);">
-                      <div class="card-header py-2" style="display:flex; justify-content:space-between; align-items:center;">
-                        <h3 class="card-title" style="font-size:12px; font-weight:700; margin:0">🔮 歷史預測勝率對帳單</h3>
-                        <span style="font-size:11px; font-weight:bold; color:var(--bs-body-color);">
-                          模型總勝率：<span id="lbl-total-winrate" style="color:#d63939; font-size:13px;">--%</span> 
-                          (已結算 <span id="lbl-total-settled-count">0</span> 筆)
-                        </span>
-                      </div>
-                      <div class="card-body p-0">
-                        <div style="overflow-x:auto; max-height:220px; overflow-y:auto">
-                          <table class="table table-sm table-hover mb-0" style="font-family:var(--mono); font-size:11px; text-align:center;">
-                            <thead style="position:sticky; top:0; background:var(--bs-card-bg); z-index:10;">
-                              <tr>
-                                <th>預測日期</th><th>股票</th><th>昨日收盤</th><th>預估開盤</th><th>看漲%</th><th>信心值</th><th>比對狀態</th><th>預測戰果</th>
-                              </tr>
-                            </thead>
-                            <tbody id="tbl-predict-history-body">
-                              <tr><td colspan="8" class="text-muted py-3">暫無歷史對帳紀錄</td></tr>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div><!-- /tab-predict -->
+    <!-- 監控清單管理 -->
+    <div class="sec-hdr" style="margin-top:10px;">
+      <div class="sec-title-mono">監控清單 <em id="id-wl-count">0</em> 檔</div>
+      <div style="display:flex;gap:6px;">
+        <input type="text" id="id-add-code" placeholder="輸入股號，例如 2330" style="width:140px;padding:5px 8px;font-family:var(--mono);font-size:12px;border-radius:4px;border:1px solid var(--border,#30363d);background:var(--bs-body-bg);color:inherit;">
+        <button class="btn btn-sm btn-success" onclick="idAddCode()">+ 新增監控</button>
+      </div>
+    </div>
+    <div id="id-wl-chips" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;">
+      <div class="empty" style="width:100%"><div class="empty-icon">📡</div>尚無監控股票，請於上方輸入股號新增</div>
+    </div>
+
+    <!-- 即時快照表格 -->
+    <div id="id-snapshot-wrap" style="overflow-x:auto;margin-bottom:16px;">
+      <table class="table" style="font-size:12px;font-family:var(--mono);white-space:nowrap;">
+        <thead>
+          <tr>
+            <th>股票</th><th>現價</th><th>漲跌%</th><th>成交量</th>
+            <th>買一/量</th><th>賣一/量</th>
+            <th>外資買賣超</th><th>投信買賣超</th><th>自營買賣超</th><th>公告日</th><th>來源</th>
+          </tr>
+        </thead>
+        <tbody id="id-snapshot-body">
+          <tr><td colspan="11" class="text-muted py-3">尚無資料</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 策略權重設定 -->
+    <div class="sec-hdr">
+      <div class="sec-title-mono">策略綜合預測權重</div>
+      <button class="btn btn-sm btn-primary" onclick="idApplyWeights()">套用權重</button>
+    </div>
+    <div id="id-weights-panel" style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px;font-family:var(--mono);font-size:12px;">
+      <div class="empty" style="width:100%">載入策略清單中...</div>
+    </div>
+    <div style="font-size:11px;color:var(--text-tertiary,#8b949e);margin:-10px 0 16px;">
+      預測價 = 現價 × (1 + 綜合訊號傾向 × ATR/現價)；綜合訊號傾向由勾選策略的訊號密度依權重加權平均，屬公開透明的策略型推算，非黑盒 AI 預測。此權重為系統目前設定，套用於所有監控股票。
+    </div>
+
+    <!-- K 線圖：實際 vs 預測 -->
+    <div class="sec-hdr">
+      <div class="sec-title-mono">K 線比對 — <span id="id-chart-code-label">請選擇監控股票</span></div>
+      <div style="display:flex;gap:14px;font-size:11px;font-family:var(--mono);align-items:center;">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#10b981;border-radius:2px;margin-right:4px;"></span>實際成交</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:2px;margin-right:4px;"></span>策略預測</span>
+      </div>
+    </div>
+    <div id="id-kline-chart" style="width:100%;height:380px;margin-bottom:16px;"></div>
+
+    <!-- 相關新聞 -->
+    <div class="sec-hdr">
+      <div class="sec-title-mono">即時相關新聞</div>
+    </div>
+    <div id="id-news-list">
+      <div class="empty"><div class="empty-icon">📰</div>選擇監控股票後顯示相關新聞</div>
+    </div>
+
+  </div><!-- /tab-intraday -->
+
+  <!-- 高鐵訂票（手動輸入驗證碼版） -->
+  <div class="panel" id="tab-thsr" style="display:none;">
+
+    <div class="sec-hdr">
+      <div class="sec-title-mono">高鐵訂票</div>
+      <div style="font-size:11px;color:var(--text-tertiary,#8b949e);font-family:var(--mono);">
+        驗證碼由本頁去噪清晰化後顯示，仍須由您本人手動輸入 — 不做任何自動辨識
+      </div>
+    </div>
+
+    <!-- Step 1：起訖站/日期/時間/票數 -->
+    <div id="thsr-step-1">
+      <div class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">出發站</label>
+          <select id="thsr-start" class="form-control"></select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">到達站</label>
+          <select id="thsr-dest" class="form-control"></select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">出發日期</label>
+          <input type="date" id="thsr-date" class="form-control">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">時間</label>
+          <select id="thsr-time" class="form-control"></select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">成人票數</label>
+          <input type="number" id="thsr-adult" class="form-control" min="0" max="10" value="1">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">孩童票數（6-11歲）</label>
+          <input type="number" id="thsr-child" class="form-control" min="0" max="10" value="0">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">愛心票數</label>
+          <input type="number" id="thsr-disabled" class="form-control" min="0" max="10" value="0">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">敬老票數</label>
+          <input type="number" id="thsr-elder" class="form-control" min="0" max="10" value="0">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">大學生票數</label>
+          <input type="number" id="thsr-college" class="form-control" min="0" max="10" value="0">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">車廂</label>
+          <select id="thsr-class" class="form-control"></select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">座位偏好</label>
+          <select id="thsr-seat" class="form-control"></select>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="thsrStart()">下一步：取得驗證碼</button>
+      <div id="thsr-step1-msg" style="margin-top:8px;font-size:12px;color:#ef4444;"></div>
+    </div>
+
+    <!-- Step 2：驗證碼 -->
+    <div id="thsr-step-2" style="display:none;">
+      <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+        
+        <!-- 三通道圖片水平完美排開 -->
+        <div style="display:flex;gap:15px;flex-wrap:wrap;align-items:center;">
+          <div>
+            <div style="font-size:11px;color:#8b949e;margin-bottom:4px;">1. 高鐵原生原圖</div>
+            <img id="thsr-captcha-img" style="border:1px solid #30363d;background:#fff;width:140px;height:48px;display:block;" />
+          </div>
+          <div>
+            <div style="font-size:11px;color:#8b949e;margin-bottom:4px;">2. 灰階網點蒸發圖</div>
+            <img id="thsr-captcha-cleaned-img" style="border:1px solid #30363d;background:#fff;height:48px;display:block;" />
+          </div>
+          <div>
+            <div style="font-size:11px;color:#8b949e;margin-bottom:4px;">3. AI 模型解碼參考</div>
+            <img id="thsr-captcha-ocr-img" style="border:1px solid #30363d;background:#fff;height:48px;display:block;" />
+          </div>
+        </div>
+
+        <!-- 輸入與導覽鍵盤控制 -->
+        <div style="flex:1;min-width:200px;display:flex;flex-direction:column;justify-content:space-between;height:72px;">
+          <div>
+            <button class="btn btn-sm" style="padding:4px 8px;font-size:11px;" onclick="thsrRefreshCaptcha()">🔄 看不清楚，換一張</button>
+          </div>
+          <div style="margin-top:auto;">
+            <label style="font-size:11px;color:#8b949e;display:block;margin-bottom:4px;">請輸入驗證碼</label>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="thsr-captcha-input" class="form-control" style="max-width:160px;" placeholder="輸入圖片中的文字">
+              <button class="btn btn-primary" style="white-space:nowrap;" onclick="thsrSubmitCaptcha()">送出，查詢可選車次</button>
+              <button class="btn btn-secondary" style="white-space:nowrap;background:#6e7681;color:#fff;" onclick="thsrPrevStep(1)">⬅️ 修改條件</button>
+              <button class="btn btn-sm" style="white-space:nowrap;" onclick="thsrRestartConfirm()">🔄 重新訂票</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div id="thsr-step2-msg" style="margin-top:8px;font-size:12px;color:#ef4444;"></div>
+    </div>
+
+    <!-- Step 3：選擇車次 (加入返回 Step 2 按鈕) -->
+    <div id="thsr-step-3" style="display:none;">
+      <div style="overflow-x:auto;">
+        <table class="table" style="font-size:12px;">
+          <thead><tr><th></th><th>車次</th><th>出發</th><th>到達</th><th>行車時間</th><th>優惠</th></tr></thead>
+          <tbody id="thsr-trains-body"></tbody>
+        </table>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:10px;">
+        <button class="btn btn-primary" onclick="thsrSelectTrain()">下一步：填寫訂票人資料</button>
+        <!-- 🌟 新增：返回 Step 2 重新看驗證碼 -->
+        <button class="btn btn-secondary" style="background:#6e7681;color:#fff;" onclick="thsrPrevStep(2)">⬅️ 重看驗證碼</button>
+        <button class="btn btn-sm" onclick="thsrRestartConfirm()">🔄 重新訂票</button>
+      </div>
+      <div id="thsr-step3-msg" style="margin-top:8px;font-size:12px;color:#ef4444;"></div>
+    </div>
+
+    <!-- Step 4：身分證/手機 (加入返回 Step 3 按鈕) -->
+    <div id="thsr-step-4" style="display:none;">
+      <div class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px;max-width:500px;">
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">身分證字號（訂購人）</label>
+          <input type="text" id="thsr-personal-id" class="form-control" maxlength="10" placeholder="A123456789">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">手機（選填，09開頭10碼）</label>
+          <input type="text" id="thsr-phone" class="form-control" maxlength="10" placeholder="0912345678">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-primary" onclick="thsrConfirm()">送出訂票</button>
+        <!-- 🌟 新增：返回 Step 3 重新選車次 -->
+        <button class="btn btn-secondary" style="background:#6e7681;color:#fff;" onclick="thsrPrevStep(3)">⬅️ 重選車次</button>
+        <button class="btn btn-sm" onclick="thsrRestartConfirm()">🔄 重新訂票</button>
+      </div>
+      <div id="thsr-step4-msg" style="margin-top:8px;font-size:12px;color:#ef4444;"></div>
+    </div>
+
+    <!-- Step 5：結果 -->
+    <div id="thsr-step-5" style="display:none;">
+      <div class="empty" style="border:1px solid #10b981;">
+        <div class="empty-icon">🎫</div>
+        <div id="thsr-result-detail" style="font-family:var(--mono);font-size:13px;line-height:1.9;text-align:left;display:inline-block;"></div>
+      </div>
+      <button class="btn btn-sm" style="margin-top:12px;" onclick="thsrRestart()">➕ 訂下一張票</button>
+    </div>
+
+  </div><!-- /tab-thsr -->
+
+  <!-- ═══ Tab 2：高鐵自動搶票（結合 thsr-ticket-monitor 監控通知 + THSR-Sniper 精準時間自動下單） ═══ -->
+  <div class="panel" id="tab-thsr-sniper" style="display:none;">
+
+    <div class="sec-hdr">
+      <div class="sec-title-mono">高鐵自動搶票（狙擊模式）</div>
+      <div style="font-size:11px;color:var(--text-tertiary,#8b949e);font-family:var(--mono);">
+        可設定「只監控通知」或「凌晨自動搶票」。自動搶票模式會在您指定的時間（例如開賣日當天凌晨 00:00）
+        自動嘗試驗證碼辨識、篩選車次並完成訂票，訂到就直接通知您。
+      </div>
+    </div>
+
+    <div class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">出發站</label>
+        <select id="sniper-start" class="form-control"></select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">到達站</label>
+        <select id="sniper-dest" class="form-control"></select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">出發日期</label>
+        <input type="date" id="sniper-date" class="form-control">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">期望出發時段（起）</label>
+        <input type="time" id="sniper-time-start" class="form-control" value="08:00">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">期望出發時段（迄）</label>
+        <input type="time" id="sniper-time-end" class="form-control" value="10:00">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">車票類型</label>
+        <select id="sniper-ticket-type" class="form-control">
+          <option value="any">不限（有位就好）</option>
+          <option value="early_bird">只要早鳥優惠車次</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">成人票數</label>
+        <input type="number" id="sniper-adult" class="form-control" min="0" max="10" value="1">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">孩童票數</label>
+        <input type="number" id="sniper-child" class="form-control" min="0" max="10" value="0">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">愛心票數</label>
+        <input type="number" id="sniper-disabled" class="form-control" min="0" max="10" value="0">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">敬老票數</label>
+        <input type="number" id="sniper-elder" class="form-control" min="0" max="10" value="0">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">大學生票數</label>
+        <input type="number" id="sniper-college" class="form-control" min="0" max="10" value="0">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">車廂</label>
+        <select id="sniper-class" class="form-control"></select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">座位偏好</label>
+        <select id="sniper-seat" class="form-control"></select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">
+          <input type="checkbox" id="sniper-connected-seats"> 座位相連
+        </label>
+        <div style="font-size:10px;color:var(--text-tertiary,#8b949e);">
+          高鐵官網會自動把「同一次訂單」裡的多張票安排在相鄰座位，只要票數 &gt; 1 張系統就會這樣處理；
+          官網本身沒有提供額外的「強制相連」欄位可送。
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:12px;">
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">模式</label>
+        <select id="sniper-mode" class="form-control" onchange="sniperOnModeChange()">
+          <option value="watch">只監控，找到座位發通知給我（不自動購票）</option>
+          <option value="auto_book">凌晨自動搶票，訂到直接幫我完成訂票</option>
+        </select>
+      </div>
+      <div id="sniper-auto-book-fields" style="display:none;">
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">身分證字號（訂購人）</label>
+        <input type="text" id="sniper-personal-id" class="form-control" maxlength="10" placeholder="A123456789">
+      </div>
+      <div id="sniper-auto-book-fields-2" style="display:none;">
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">手機（09開頭10碼）</label>
+        <input type="text" id="sniper-phone" class="form-control" maxlength="10" placeholder="0912345678">
+      </div>
+      <div id="sniper-release-fields" style="display:none;">
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">
+          <input type="checkbox" id="sniper-release-midnight" checked onchange="sniperOnReleaseModeChange()">
+          出發日當天凌晨 00:00 自動開始搶票
+        </label>
+        <input type="datetime-local" id="sniper-release-custom" class="form-control" style="display:none;margin-top:6px;">
+      </div>
+      <div id="sniper-duration-field" style="display:none;">
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">最長嘗試時間（分鐘）</label>
+        <input type="number" id="sniper-max-duration" class="form-control" min="1" max="120" value="20">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">通知 Email（選填）</label>
+        <input type="email" id="sniper-notify-email" class="form-control" placeholder="you@example.com">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">
+          <input type="checkbox" id="sniper-notify-line" checked> LINE 通知
+        </label>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="sniperStart()">🚀 開始監控 / 搶票</button>
+    <div id="sniper-start-msg" style="margin-top:8px;font-size:12px;color:#ef4444;"></div>
+
+    <div style="margin-top:24px;">
+      <div class="sec-hdr">
+        <div class="sec-title-mono" style="font-size:13px;">我的監控 / 搶票任務</div>
+        <button class="btn btn-sm" onclick="sniperRefreshTasks()">🔄 重新整理</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="table" style="font-size:12px;">
+          <thead>
+            <tr><th>路線</th><th>日期/時段</th><th>模式</th><th>狀態</th><th>最後更新</th><th>結果</th><th></th></tr>
+          </thead>
+          <tbody id="sniper-tasks-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /tab-thsr-sniper -->
+
+  <!-- ═══ Tab 3：高鐵訂位查詢／取消 ═══ -->
+  <div class="panel" id="tab-thsr-history" style="display:none;">
+
+    <div class="sec-hdr">
+      <div class="sec-title-mono">我在本系統訂過的票</div>
+      <button class="btn btn-sm" onclick="historyRefreshMyBookings()">🔄 重新整理</button>
+    </div>
+    <div style="font-size:11px;color:var(--text-tertiary,#8b949e);font-family:var(--mono);margin-bottom:8px;">
+      不論是「高鐵訂票」手動訂的，還是「高鐵自動搶票」搶到的，只要訂票成功都會列在這裡，
+      點「查詢/取消」可以直接帶入證件號碼與訂位代號，不用重新手動輸入。
+    </div>
+    <div style="overflow-x:auto;margin-bottom:20px;">
+      <table class="table" style="font-size:12px;">
+        <thead>
+          <tr><th>訂位代號</th><th>路線</th><th>日期/車次</th><th>座位</th><th>來源</th><th>狀態</th><th></th></tr>
+        </thead>
+        <tbody id="history-my-bookings-body"></tbody>
+      </table>
+    </div>
+
+    <!-- ══ 訂票紀錄 詳情／編輯 MODAL ═══════════════════════════════ -->
+    <div class="overlay" id="booking-detail-modal" onclick="if(event.target===this)closeModal('booking-detail-modal')">
+      <div class="modal-box" style="width:480px;max-width:95vw;">
+        <div class="modal-hdr">訂票紀錄詳情</div>
+        <div style="padding:12px 16px;font-size:12px;line-height:2;" id="booking-detail-body"></div>
+        <div class="modal-btns">
+          <button class="btn btn-sm btn-outline-secondary" onclick="closeModal('booking-detail-modal')">關閉</button>
+          <button class="btn btn-sm" onclick="historyOpenEditFromDetail()">✏️ 編輯</button>
+          <button class="btn btn-sm btn-danger" onclick="historyDeleteFromDetail()">🗑️ 刪除紀錄</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="booking-edit-modal" onclick="if(event.target===this)closeModal('booking-edit-modal')">
+      <div class="modal-box" style="max-width:360px">
+        <div class="modal-hdr">編輯訂票紀錄</div>
+        <div style="padding:12px 16px">
+          <label class="form-label">取票識別碼／身分證字號</label>
+          <input class="form-control form-control-sm" id="booking-edit-personal-id">
+          <label class="form-label" style="margin-top:8px;">聯絡電話</label>
+          <input class="form-control form-control-sm" id="booking-edit-phone">
+          <label class="form-label" style="margin-top:8px;">狀態</label>
+          <select class="form-control form-control-sm" id="booking-edit-status">
+            <option value="booked">✅ 已訂票</option>
+            <option value="cancelled">❌ 已取消</option>
+          </select>
+        </div>
+        <div class="modal-btns">
+          <button class="btn btn-sm btn-outline-secondary" onclick="closeModal('booking-edit-modal')">取消</button>
+          <button class="btn btn-sm btn-success" onclick="historySaveBookingEdit()">✓ 儲存</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-hdr">
+      <div class="sec-title-mono">查詢／取消訂位</div>
+      <div style="font-size:11px;color:var(--text-tertiary,#8b949e);font-family:var(--mono);">
+        直接連線高鐵官網即時查詢最新狀態，可查任何訂位代號（包含非本系統訂的票）。
+      </div>
+    </div>
+
+    <div id="history-step-1">
+      <button class="btn btn-primary" onclick="historyStart()">開始查詢（取得驗證碼）</button>
+    </div>
+
+    <div id="history-step-2" style="display:none;margin-top:12px;">
+      <div class="form-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:12px;">
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">證件類型</label>
+          <select id="history-id-type" class="form-control">
+            <option value="0">身分證字號</option>
+            <option value="1">護照/居留證/入出境許可證號</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">證件號碼</label>
+          <input type="text" id="history-roc-id" class="form-control" placeholder="A123456789">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">訂位代號（8碼）</label>
+          <input type="text" id="history-order-id" class="form-control" maxlength="8" placeholder="03532489">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;margin-bottom:12px;">
+        <div>
+          <div style="font-size:11px;color:var(--text-tertiary,#8b949e);">原始驗證碼</div>
+          <img id="history-captcha-img" style="border:1px solid #333;border-radius:4px;max-width:160px;">
+        </div>
+        <div>
+          <div style="font-size:11px;color:var(--text-tertiary,#8b949e);">AI 降噪對照圖</div>
+          <img id="history-captcha-cleaned-img" style="border:1px solid #333;border-radius:4px;max-width:160px;">
+        </div>
+        <div style="align-self:center;">
+          <button class="btn btn-sm" onclick="historyRefreshCaptcha()">🔄 換一張</button>
+        </div>
+      </div>
+      <div style="max-width:200px;margin-bottom:12px;">
+        <label style="font-size:11px;color:var(--text-tertiary,#8b949e);">驗證碼（AI已自動辨識並填入，請人工確認）</label>
+        <input type="text" id="history-captcha-val" class="form-control" maxlength="4">
+      </div>
+
+      <button class="btn btn-primary" onclick="historyQuery()">查詢訂位</button>
+      <div id="history-query-msg" style="margin-top:8px;font-size:12px;color:#ef4444;"></div>
+    </div>
+
+    <div id="history-result" style="display:none;margin-top:20px;">
+      <div class="sec-hdr"><div class="sec-title-mono" style="font-size:13px;">查詢結果</div></div>
+      <table class="table" style="font-size:12px;">
+        <tbody id="history-result-body"></tbody>
+      </table>
+      <button class="btn" id="history-cancel-btn" style="background:#d63939;color:#fff;margin-top:8px;" onclick="historyCancel()">🗑️ 取消這筆訂位</button>
+      <div id="history-cancel-msg" style="margin-top:8px;font-size:12px;"></div>
+    </div>
+
+  </div><!-- /tab-thsr-history -->
 
 </main>
+
 
 <!-- ══ ADD / EDIT MODAL ════════════════════════════════════════ -->
 <div class="overlay" id="wl-add-modal" onclick="if(event.target===this)closeModal('wl-add-modal')">
@@ -422,8 +931,7 @@
     <div class="modal-hdr">+ 新增觀察股票</div>
     <div style="padding:12px 16px">
       <label class="form-label">股票代號</label>
-      <input class="form-control form-control-sm" id="wl-code" placeholder="例：2330" maxlength="6"
-        onkeydown="if(event.key==='Enter')saveWlAdd()">
+      <input class="form-control form-control-sm" id="wl-code" placeholder="例：2330" maxlength="6" onkeydown="if(event.key==='Enter')saveWlAdd()">
     </div>
     <div class="modal-btns">
       <button class="btn btn-sm btn-outline-secondary" onclick="closeModal('wl-add-modal')">取消</button>
@@ -439,8 +947,7 @@
     <div class="fg">
       <label class="form-label">代號</label>
       <div style="display:flex;gap:8px;align-items:center">
-        <input class="form-control form-control-sm" id="f-code" placeholder="2330"
-          style="width:110px;flex-shrink:0" oninput="autoFetchName(this.value)">
+        <input class="form-control form-control-sm" id="f-code" placeholder="2330" style="width:110px;flex-shrink:0" oninput="autoFetchName(this.value)">
         <span id="f-name-tag" style="font-family:var(--mono);font-size:12px;color:var(--bs-tertiary-color)">
           輸入代號自動查詢
         </span>
@@ -545,7 +1052,6 @@
   </div>
 </div>
 
-
 <!-- ══ HIDDEN LEGACY STUBS (JS compatibility) ══════════════════ -->
 <div style="display:none">
   <span id="risk-val"></span>
@@ -567,9 +1073,58 @@
 <script src="/static/js/intelligence.js"></script>
 <script src="/static/js/topic.js"></script>
 <script src="/static/js/settings.js"></script>
-<!-- 🔴 3-1. 新增：引入外部獨立的分頁大腦腳本檔案 -->
 <script src="/static/js/predict.js?v=999"></script>
+<script src="/static/js/intraday.js"></script>
+<script src="/static/js/thsr.js"></script>
+<script src="/static/js/thsr_sniper.js"></script>
+<script src="/static/js/thsr_history.js"></script>
+
 <script>
+/**
+ * 名稱自動帶入非同步函式
+ * 直接複用 app.js 的共用 api() 包裝（會自動帶上 Authorization: Bearer JWT），
+ * 不再手動組 X-API-Key，避免多人登入下金鑰對不上的問題。
+ */
+async function autoFetchName(ticker) {
+    if (!ticker || ticker.length < 2) return;
+    try {
+        const data = await api('GET', `/api/market/name?ticker=${encodeURIComponent(ticker)}`);
+        const nameInput = document.getElementById('f-name');
+        const nameTag = document.getElementById('f-name-tag');
+        if (data && data.name) {
+            if (nameInput) nameInput.value = data.name;
+            if (nameTag) nameTag.innerText = data.name;
+        }
+    } catch (err) {
+        console.error("❌ 名稱自動帶入失敗:", err);
+    }
+}
+
+/**
+ * 頁面載入時的登入狀態檢查
+ * 未帶有效 JWT（多人登入）時，導向登入頁。
+ */
+function handleLogout() {
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('trade_sys_jwt');
+    localStorage.removeItem('username');
+    localStorage.removeItem('display_name');
+    window.location.href = '/login';
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const token = localStorage.getItem('jwt_token');
+    if (!token || token.length < 20) {
+        window.location.href = '/login';
+        return;
+    }
+    const displayName = localStorage.getItem('display_name') || localStorage.getItem('username') || '';
+    const navUsername = document.getElementById('nav-username');
+    if (navUsername && displayName) {
+        navUsername.textContent = '👤 ' + displayName;
+    }
+});
+
 // 執行原系統既有初始化
 try {
     loadPositions().catch(e => console.warn('positions 載入失敗', e));
@@ -582,9 +1137,8 @@ try {
     console.warn("原廠初始化順序校正", initErr);
 }
 
-// 🟢 終極激活：當 DOM 結構準備好，不管使用者有沒有點按鈕，全自動率先激活對帳單與時間！
+// 全自動激活歷史紀錄對帳單與當前時間
 document.addEventListener("DOMContentLoaded", function() {
-    // 1. 初始化當下真實時間，一秒消滅 2026/06/12 14:30 穿越隱患
     const timeEl = document.getElementById('lbl-trading-time');
     if (timeEl) {
         const now = new Date();
@@ -593,40 +1147,65 @@ document.addEventListener("DOMContentLoaded", function() {
         timeEl.innerText = "資料時間：" + now.getFullYear() + "/" + (now.getMonth() + 1) + "/" + now.getDate() + " " + currentHours + ":" + currentMinutes;
     }
 
-    // 2. 初始載入：無條件直接去 SQLite 撈取歷史紀錄填滿表格
     if (typeof window.loadPredictionHistoryTable === 'function') {
-        console.log("🚀 [全自動激活] 頁面初始化成功，率先通車拉取 SQLite 歷史紀錄表...");
         window.loadPredictionHistoryTable();
     }
 });
 
-// 完美對接導覽列切換
+// 全分頁導覽列切換核心邏輯
 window.addEventListener("load", function() {
     const tabs = document.querySelectorAll(".nav-tabs-bar .tab");
     tabs.forEach(tab => {
         tab.addEventListener("click", function() {
             const targetTab = this.getAttribute("data-tab");
             
+            // 隱藏所有面板、移除所有 active 狀態
+            document.querySelectorAll(".panel").forEach(p => p.style.display = "none");
+            tabs.forEach(t => t.classList.remove("active"));
+            
+            // 啟用當前分頁與顯示對應面板
+            this.classList.add("active");
+            const targetPanel = document.getElementById("tab-" + targetTab);
+            if (targetPanel) {
+                targetPanel.style.display = "block";
+            }
+            
+            // 針對台股預測分頁的額外連動觸發
             if (targetTab === "predict") {
-                document.querySelectorAll(".panel, .tab-pane-content").forEach(p => p.style.display = "none");
-                tabs.forEach(t => t.classList.remove("active"));
-                
-                this.classList.add("active");
-                const predPanel = document.getElementById("tab-predict");
-                if (predPanel) predPanel.style.display = "block";
-                
                 const inputQ = document.getElementById("predict-stock-q");
                 if (inputQ && !inputQ.value.trim()) {
                     inputQ.value = "1717";
                 }
-                
-                // 切換分頁同步雙線重刷
                 if (typeof window.loadPredictionHistoryTable === 'function') {
                     window.loadPredictionHistoryTable();
                 }
                 if (typeof runStockPrediction === 'function') {
                     runStockPrediction();
                 }
+            }
+
+            // 即時監控分頁：進入時啟動前端輪詢，離開時停止（後端 Daemon 仍會持續獨立運作）
+            if (targetTab === "intraday") {
+                if (typeof window.initIntradayTab === 'function') {
+                    window.initIntradayTab();
+                }
+            } else if (typeof window.stopIntradayPolling === 'function') {
+                window.stopIntradayPolling();
+            }
+
+            // 高鐵訂票分頁：進入時載入站名/時刻表等靜態資料
+            if (targetTab === "thsr" && typeof window.initThsrTab === 'function') {
+                window.initThsrTab();
+            }
+
+            // 高鐵自動搶票分頁：進入時載入站名/時刻表 + 重新整理任務列表
+            if (targetTab === "thsr-sniper" && typeof window.initSniperTab === 'function') {
+                window.initSniperTab();
+            }
+
+            // 高鐵訂位查詢/取消分頁：進入時重新整理「我訂過的票」列表
+            if (targetTab === "thsr-history" && typeof window.initHistoryTab === 'function') {
+                window.initHistoryTab();
             }
         });
     });
