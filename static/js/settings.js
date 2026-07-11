@@ -23,16 +23,6 @@ let CURRENT_MODULE_ID = "settings_page"; // 標記這個網頁模組的固定識
 
 
 // ── Settings ─────────────────────────────────────────────────
-async function runScanner(){
-  try {
-    const r = await api('GET', '/api/market');
-    const market = r.market || {};
-    // 渲染掃描結果...
-  } catch(e){
-    console.error('執行掃描失敗:', e);
-  }
-}
-
 async function openSettings(){
   // // 🟢 修正點：將原本的 /api/config 改成呼叫我們新架設的 /api/user_config
   // // 並且在網址後面用 query 參數帶上目前的 user_id 與 module_id

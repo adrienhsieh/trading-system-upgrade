@@ -18,31 +18,18 @@ function toggleTechFilter(){
   }
 }
 
-async function runScanner(){
-  try {
-    const r = await api('GET', '/api/market');
-    const market = r.market || {};
-    // 渲染掃描結果...
-  } catch(e){
-    console.error('執行掃描失敗:', e);
-  }
+function setStrat(s){
+  currentStrat=s;
+  const ids = {trend:'strend', ict:'sict', fundamental:'sfundamental', rsi:'srsi', macd:'smacd',
+               bollinger:'sbollinger', breakout:'sbreakout', vix_panic:'svixpanic',
+               chip_washout:'schipwashout', ensemble:'sensemble'};
+  Object.entries(ids).forEach(([name, id]) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('active', s === name);
+  });
 }
-
-
-function setStrat(s){ currentStrat=s; document.getElementById('strend').classList.toggle('active',s==='trend'); document.getElementById('sict').classList.toggle('active',s==='ict'); document.getElementById('sfundamental').classList.toggle('active',s==='fundamental'); }
 
 let scanAbort = null;
-
-async function runScan(){
-  try {
-    const r = await api('GET', '/api/market');
-    const market = r.market || {};
-    // 渲染掃描結果...
-  } catch(e){
-    console.error('執行掃描失敗:', e);
-  }
-}
-
 async function runScan(){
   const btn = document.getElementById('scan-btn');
   const stopBtn = document.getElementById('scan-stop-btn');
@@ -95,7 +82,8 @@ function runFullScan(){
 
   const filterParam = techFilterEnabled ? '&filter=tech' : '';
   const _scanKey = localStorage.getItem('trading_api_key') || '';
-  fullScanEs = new EventSource('/api/scan/full?strategy='+currentStrat+filterParam+'&key='+encodeURIComponent(_scanKey));
+  const _scanToken = localStorage.getItem('jwt_token') || '';
+  fullScanEs = new EventSource('/api/scan/full?strategy='+currentStrat+filterParam+'&key='+encodeURIComponent(_scanKey)+'&token='+encodeURIComponent(_scanToken));
 
   fullScanEs.onmessage = (e)=>{
     const d = JSON.parse(e.data);
@@ -159,18 +147,25 @@ function renderScan(r){
   const strat=r.strategy||currentStrat||'trend';
   const sc=(v,total)=>v>=total-1?'var(--green)':v>=Math.floor(total/2)?'var(--yellow)':'var(--red)';
   const cards=results.map(s=>{
-    const total=s.total_enabled||(strat==='ict'?7:strat==='fundamental'?5:6);
+    const total=s.total_enabled||({ict:7,fundamental:5,rsi:4,macd:4,bollinger:4,breakout:4,vix_panic:4,chip_washout:4}[strat]||6);
     const dots=Object.entries(s.signals).map(([k,v])=>`<span class="dot ${v.enabled===false?'disabled':v.pass?'pass':'fail'}">${v.label}</span>`).join('');
-    const sub=strat==='ict'
-      ? `收 ${s.close} ｜ 均衡 ${s.equilibrium||'--'} ｜ OB ${s.ob_low||'--'}~${s.ob_high||'--'}`
-      : strat==='fundamental'
-        ? `收 ${s.close} ｜ PE ${s.pe??'--'} ｜ PB ${s.pb??'--'}`
-        : `收 ${s.close} ｜ ADX ${s.adx} ｜ ATR ${s.atr}`;
-    const extra=strat==='ict'
-      ? `<div class="sc-w52">區間 L:${s.range_low||'--'} H:${s.range_high||'--'}${s.mss_level?' ｜ MSS:'+s.mss_level:''}</div>`
-      : strat==='fundamental'
-        ? `<div class="sc-w52">EPS ${s.eps??'--'} → ${s.forward_eps??'--'} ｜ 營收成長 ${s.revenue_growth!=null?s.revenue_growth+'%':'--'}</div>`
-        : `<div class="sc-w52">52週 L:${s.w52_low} H:${s.w52_high}</div>`;
+    const subMap = {
+      ict:         `收 ${s.close} ｜ 均衡 ${s.equilibrium||'--'} ｜ OB ${s.ob_low||'--'}~${s.ob_high||'--'}`,
+      fundamental: `收 ${s.close} ｜ PE ${s.pe??'--'} ｜ PB ${s.pb??'--'}`,
+      rsi:         `收 ${s.close} ｜ RSI ${s.rsi??'--'}`,
+      macd:        `收 ${s.close} ｜ MACD ${s.macd??'--'} ｜ 柱 ${s.hist??'--'}`,
+      bollinger:   `收 ${s.close} ｜ 中軌 ${s.mid??'--'} ｜ 上軌 ${s.upper??'--'}`,
+      breakout:    `收 ${s.close} ｜ 前高 ${s.prior_high??'--'} ｜ EMA20 ${s.ema20??'--'}`,
+      vix_panic:   `收 ${s.close} ｜ VIX ${s.vix??'--'} ｜ PE ${s.pe??'--'} ｜ 殖利率 ${s.dividend_yield??'--'}%`,
+      chip_washout:`收 ${s.close} ｜ 融資變化 ${s.margin_change_pct??'--'}% ｜ 股價變化 ${s.price_change_pct??'--'}%`,
+      ensemble:    `收 ${s.close} ｜ 子策略票數 ${s.score}/${s.total_enabled}`,
+    };
+    const sub = subMap[strat] || `收 ${s.close} ｜ ADX ${s.adx} ｜ ATR ${s.atr}`;
+    const extraMap = {
+      ict:         `<div class="sc-w52">區間 L:${s.range_low||'--'} H:${s.range_high||'--'}${s.mss_level?' ｜ MSS:'+s.mss_level:''}</div>`,
+      fundamental: `<div class="sc-w52">EPS ${s.eps??'--'} → ${s.forward_eps??'--'} ｜ 營收成長 ${s.revenue_growth!=null?s.revenue_growth+'%':'--'}</div>`,
+    };
+    const extra = extraMap[strat] || (strat==='trend' ? `<div class="sc-w52">52週 L:${s.w52_low} H:${s.w52_high}</div>` : '');
     const safeName=encodeURIComponent(s.name||'');
 
     // ──【新增】自適應 AI 綜合研判前端 HTML 區塊 ──

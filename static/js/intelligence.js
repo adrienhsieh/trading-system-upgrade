@@ -33,16 +33,6 @@ async function loadAiSentiment(){
 }
 
 // ── X / Twitter Intel ─────────────────────────────────────────
-async function loadXIntel(){
-  try {
-    const r = await api('GET', '/api/intel');
-    const intel = r.intel || [];
-    // 渲染情報列表...
-  } catch(e){
-    console.error('載入情報失敗:', e);
-  }
-}
-
 async function loadXIntel(collect=false){
   const btn = document.getElementById('x-intel-btn');
   btn.disabled = true;

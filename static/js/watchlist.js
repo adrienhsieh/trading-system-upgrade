@@ -42,40 +42,29 @@ async function removeWl(code) {
   } catch (e) { toast('移除失敗：' + (e.message||''), 'err'); }
 }
 
-
-async function loadWatchlist(){
+async function loadWatchlist() {
+  const el = document.getElementById('wl-list');
+  el.innerHTML = '<div class="loader"><div class="spinner"></div>載入觀察名單...</div>';
   try {
-    const r = await api('GET', '/api/market');
-    const market = r.market || {};
-    // 渲染自選股清單...
-  } catch(e){
-    console.error('載入自選股失敗:', e);
+    const r = await api('GET', '/api/watchlist');
+    const items = r.items || [];
+    document.getElementById('wl-count').textContent = items.length;
+    if (!items.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-icon">👀</div>尚無觀察股票，點擊「+ 新增」開始追蹤</div>';
+      return;
+    }
+    el.innerHTML = items.map(i => `<div class="wcard" id="wl-${i.code}">
+      <div class="wcard-hdr">
+        <span><span class="stkcode">${esc(i.code)}</span> <b>${esc(i.name)}</b></span>
+        <button class="btn-xs danger" onclick="removeWl('${i.code}')">✕</button>
+      </div>
+      <div class="wcard-body" style="color:var(--text-secondary);font-size:11px">載入分析中...</div>
+    </div>`).join('');
+    loadWatchlistAnalysis();
+  } catch (e) {
+    el.innerHTML = `<div class="empty" style="color:var(--red)">載入失敗：${esc(e.message||'請重啟伺服器')}</div>`;
   }
 }
-
-//async function loadWatchlist() {
-//  const el = document.getElementById('wl-list');
-//  el.innerHTML = '<div class="loader"><div class="spinner"></div>載入觀察名單...</div>';
-//  try {
-//    const r = await api('GET', '/api/watchlist');
-//    const items = r.items || [];
-//    document.getElementById('wl-count').textContent = items.length;
-//    if (!items.length) {
-//      el.innerHTML = '<div class="empty"><div class="empty-icon">👀</div>尚無觀察股票，點擊「+ 新增」開始追蹤</div>';
-//      return;
-//    }
-//    el.innerHTML = items.map(i => `<div class="wcard" id="wl-${i.code}">
-//      <div class="wcard-hdr">
-//        <span><span class="stkcode">${esc(i.code)}</span> <b>${esc(i.name)}</b></span>
-//        <button class="btn-xs danger" onclick="removeWl('${i.code}')">✕</button>
-//      </div>
-//      <div class="wcard-body" style="color:var(--text-secondary);font-size:11px">載入分析中...</div>
-//    </div>`).join('');
-//    loadWatchlistAnalysis();
-//  } catch (e) {
-//    el.innerHTML = `<div class="empty" style="color:var(--red)">載入失敗：${esc(e.message||'請重啟伺服器')}</div>`;
-//  }
-//}
 
 async function loadWatchlistAnalysis() {
   if (_wlAnalysisCache && (Date.now() - _wlAnalysisTime < _WL_CACHE_TTL)) {

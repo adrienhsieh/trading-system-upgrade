@@ -1,30 +1,11 @@
 // ── News (RSS) ───────────────────────────────────────────────
-//async function loadNews(){
-//  document.getElementById('news-list').innerHTML=`<div class="loader"><div class="spinner"></div>讀取 RSS 財經新聞...</div>`;
-//  try{
-//    const r=await api('GET','/api/news');
-//    renderNews(r.news||[]);
-//  }catch(e){ document.getElementById('news-list').innerHTML=`<div class="empty" style="color:var(--red)">RSS 讀取失敗</div>`; }
-//}
-
 async function loadNews(){
-  try {
-    const r = await api('GET', '/api/news');
-    const news = r.news || [];
-    const list = document.getElementById('news-list');
-    if (!list) return;
-
-    list.innerHTML = '';
-    news.forEach(n=>{
-      const item = document.createElement('li');
-      item.textContent = `${esc(n.title)} (${esc(n.source)})`;
-      list.appendChild(item);
-    });
-  } catch(e){
-    console.error('載入新聞失敗:', e);
-  }
+  document.getElementById('news-list').innerHTML=`<div class="loader"><div class="spinner"></div>讀取 RSS 財經新聞...</div>`;
+  try{
+    const r=await api('GET','/api/news');
+    renderNews(r.news||[]);
+  }catch(e){ document.getElementById('news-list').innerHTML=`<div class="empty" style="color:var(--red)">RSS 讀取失敗</div>`; }
 }
-
 
 function fmtNewsDate(n){
   if(n.pub_iso){

@@ -28,28 +28,6 @@ async function searchTopic() {
     container.innerHTML = `<div class="empty" style="color:var(--red)">搜尋失敗，請確認伺服器執行中</div>`;
   }
 }
-async function searchTopic(){
-  try {
-    const q = document.getElementById('scan-topic-q').value;
-    const r = await api('GET', `/api/coverage?q=${encodeURIComponent(q)}`);
-    const coverage = r.coverage || {};
-    // 渲染主題搜尋結果...
-  } catch(e){
-    console.error('搜尋主題失敗:', e);
-  }
-}
-
-
-async function loadCoverageKeywords(){
-  try {
-    const r = await api('GET', '/api/coverage');
-    const coverage = r.coverage || {};
-    // 渲染關鍵字...
-  } catch(e){
-    console.error('載入籌碼覆蓋失敗:', e);
-  }
-}
-
 
 function runTopicSearch(keyword) {
   closeCoverageModal();

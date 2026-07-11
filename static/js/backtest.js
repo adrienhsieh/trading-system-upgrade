@@ -42,21 +42,6 @@ async function runBacktest(){
 }
 function stopBacktest(){ if(btAbort){ btAbort.abort(); btAbort=null; } }
 
-
-
-async function runBacktest(code, strategy){
-  try {
-    const r = await api('POST', '/api/predict/calculate', {code, strategy});
-    console.log('回測結果:', r);
-    toast(`回測完成：${code} (${strategy})`, 'ok');
-  } catch(e){
-    console.error('回測失敗:', e);
-    toast('回測失敗', 'error');
-  }
-}
-
-
-
 // ── Full-market Backtest (SSE) ────────────────────────────────
 let fullBtEs = null;
 let btTechFilterEnabled = false;

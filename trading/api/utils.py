@@ -1,122 +1,85 @@
 """
-trading/api/utils.py — JWT 憑證簽發、解密與 API 驗證高階工具（安全整合版）
-"""
+trading/api/utils.py — JWT 憑證簽發、解密與驗證裝飾器（多人登入核心）
 
+設計原則（對齊「JWT 多人版（Multi-tenant）改造規格說明書」）：
+- 帳密表共用（db/users.db），個人資料物理隔離（db/user_{username}/）。
+- Token 內夾帶 user_id + username，驗證通過後注入 flask.g，
+  供 trading.services.container 依此動態切換至該用戶專屬的 DB／設定檔。
+"""
 import os
-import jwt
 from datetime import datetime, timedelta, timezone
 from functools import wraps
-from flask import request, jsonify, g
 
-from trading.config import FLASK_SECRET_KEY
+import jwt
+from flask import g, jsonify, request
 
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
 
-
-
-def get_jwt_secret():
-    """確保全域密鑰與 Flask App 秘密鎖絕對同步"""
-    return os.getenv("FLASK_SECRET_KEY", "super-secret-key-change-me")
-
-
-
-def validate_code(code=None):
-    """相容舊版驗證邏輯，固定回傳 True"""
-    return True
+JWT_EXPIRY_HOURS = int(os.environ.get("JWT_EXPIRY_HOURS", 24))
 
 
-def get_jwt_secret():
-    """確保全域密鑰與 Flask App 秘密鎖絕對同步"""
-    return FLASK_SECRET_KEY
+def get_jwt_secret() -> str:
+    """JWT 簽章密鑰。正式環境務必在 .env 設定 JWT_SECRET_KEY 覆蓋此開發用預設值。"""
+    return os.environ.get("JWT_SECRET_KEY") or os.environ.get(
+        "FLASK_SECRET_KEY", "trading_system_dev_only_change_me_2026"
+    )
 
 
-def verify_jwt_token(token):
-    """供系統其他模組動態驗證憑證合法性"""
+def generate_token(user_id, username: str = "") -> str:
+    """生成 JWT Token，payload 內含 user_id 與 username。"""
+    now = datetime.now(timezone.utc)
+    payload = {
+        "exp": now + timedelta(hours=JWT_EXPIRY_HOURS),
+        "iat": now,
+        "user_id": user_id,
+        "username": username,
+    }
+    return jwt.encode(payload, get_jwt_secret(), algorithm="HS256")
+
+
+def decode_token(token: str):
+    """解密 Token，成功回傳 payload dict，失敗回傳 None（不拋例外，供 optional 驗證使用）。"""
     try:
-        secret = get_jwt_secret()
-        payload = jwt.decode(token, secret, algorithms=["HS256"])
-        return payload
-    except Exception:
+        return jwt.decode(token, get_jwt_secret(), algorithms=["HS256"])
+    except jwt.PyJWTError:
         return None
 
 
-import jwt
-import datetime
-from trading.config import ConfigManager
-
-def generate_token(user_id: str, api_key: str):
-    """
-    生成 JWT Token
-    """
-    cfg = ConfigManager().load()
-    secret_key = cfg.get("flask_secret_key", "default_secret")
-
-    payload = {
-        "user_id": user_id,
-        "user_api_key": api_key,
-        "iat": datetime.datetime.utcnow(),
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # 有效期 1 小時
-    }
-
-    return jwt.encode(payload, secret_key, algorithm="HS256")
-
-
-#def generate_token(user_id, api_key):
-#    """生成 JWT Token，使用全域同步高強度密鑰"""
-#    now = datetime.now(timezone.utc)
-#    payload = {
-#        'exp': now + timedelta(hours=int(os.getenv("JWT_EXPIRY_HOURS", 24))),
-#        'iat': now,
-#        'user_id': user_id,
-#        'user_api_key': api_key
-#    }
-#    secret = get_jwt_secret()
-#    return jwt.encode(payload, secret, algorithm='HS256')
+def _extract_bearer_token() -> str:
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        return auth_header.split(" ", 1)[1].strip()
+    return ""
 
 
 def jwt_required(f):
-    """API 驗證裝飾器"""
+    """強制要求合法 JWT；驗證通過後將 g.current_user_id / g.current_username 注入。"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        auth_header = request.headers.get('Authorization', '')
-        if not auth_header.startswith('Bearer '):
-            return jsonify({"error": "未提供憑證，請先登入"}), 401
-
-        parts = auth_header.split(" ")
-        if len(parts) != 2:
-            return jsonify({"error": "憑證格式錯誤"}), 401
-
-        token = parts[1]
-        try:
-            secret = get_jwt_secret()
-            payload = jwt.decode(token, secret, algorithms=['HS256'])
-
-            # 注入 Context
-            g.current_user_id = payload['user_id']
-            g.current_user_api_key = payload['user_api_key']
-
-        except jwt.ExpiredSignatureError:
-            return jsonify({"error": "憑證已過期，請重新登入"}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({"error": "無效的憑證，拒絕存取"}), 401
-
+        token = _extract_bearer_token()
+        if not token:
+            return jsonify({"ok": False, "error": "未提供憑證，請先登入"}), 401
+        payload = decode_token(token)
+        if payload is None:
+            return jsonify({"ok": False, "error": "無效或過期的憑證，請重新登入"}), 401
+        g.current_user_id = payload.get("user_id")
+        g.current_username = payload.get("username", "")
         return f(*args, **kwargs)
     return decorated
 
-        
-import jwt
-from trading.config import ConfigManager
 
-def verify_token(token: str):
-    """
-    驗證 JWT Token，成功時回傳 payload，失敗時回傳 None
-    """
-    cfg = ConfigManager().load()
-    secret_key = cfg.get("flask_secret_key", "default_secret")
-
-    try:
-        payload = jwt.decode(token, secret_key, algorithms=["HS256"])
-        return payload
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
-        return None
+def jwt_optional(f):
+    """選填 JWT：若帶有效 Token 則注入 g.current_user_id；否則保持 None（維持單機／預設租戶行為）。
+    用於需要同時相容「未登入單機模式」與「多人登入模式」的既有 API。"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = _extract_bearer_token()
+        payload = decode_token(token) if token else None
+        g.current_user_id = payload.get("user_id") if payload else None
+        g.current_username = payload.get("username", "") if payload else ""
+        return f(*args, **kwargs)
+    return decorated

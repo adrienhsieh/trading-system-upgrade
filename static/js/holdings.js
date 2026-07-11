@@ -2,28 +2,6 @@
 let _reportMap = {};
 let positions = [];
 
-async function loadHoldings(){
-  try {
-    const r = await api('GET', '/api/positions');
-    const positions = r.positions || [];
-    const table = document.getElementById('holdings-table');
-    table.innerHTML = '';
-    positions.forEach(p=>{
-      const row = document.createElement('tr');
-      row.innerHTML = `
-        <td>${esc(p.code)}</td>
-        <td>${esc(p.name)}</td>
-        <td>${p.shares}</td>
-        <td>${p.avg_price}</td>
-      `;
-      table.appendChild(row);
-    });
-  } catch(e){
-    console.error('載入持股失敗:', e);
-  }
-}
-
-
 async function loadPositions(){
   const [d, rpt] = await Promise.all([
     api('GET','/api/positions'),
